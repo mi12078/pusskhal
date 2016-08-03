@@ -1,0 +1,67 @@
+%{
+
+%}
+
+%token PROGRAM CONST TYPE VAR PROCEDURE BEGIN END WHILE NOT
+%token DO IF OF THEN FOR TO DOWNTO READLN WRITELN
+%token INTEGERTYPE REALTYPE STRINGTYPE BOOLEANTYPE
+%token TRUE FALSE
+
+%union {
+	int i;
+	double r;
+	std::string *s;
+	std::string *id;
+}
+
+%%
+
+program: program_heading ';' program_block
+;
+program_heading: PROGRAM ID
+| PROGRAM ID '(' program_parameters ')'
+;
+program_parameters: program_parameters ',' ID
+| ID
+;
+program_block: block '.'
+;
+block: const_defs type_defs var_decls proc_func_decls stmt_part
+;
+
+const_defs: CONST const_def_list
+;
+const_def_list: const_def_list ';' const_def
+| const_def
+;
+const_def: ID '=' NUM
+|
+;
+
+type_defs: type_def_list ';' type_def
+| type_def
+;
+type_def: 
+var_decls:
+;
+proc_func_decls:
+;
+stmt_part: compound_statement
+;
+
+compound_statement: BEGIN statement_seq END
+;
+statement_seq: statement_seq ';' statement
+| statement
+;
+statement:
+|
+;
+
+
+%%
+
+int main()
+{
+	yyparse();
+}

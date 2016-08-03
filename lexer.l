@@ -1,9 +1,14 @@
 
 %{
 #include <iostream>
+#include <string>
 
 /*promeniti strdup, vratiti std::string*/
 /*lexer prolazi za primer, za sada*/
+/*
+sta da vracaju tipovi? zaseban token ili token da se
+identifikuju kao tipovi?
+*/
 
 %}
 
@@ -33,8 +38,21 @@
 (?i:to) { return TO; }
 (?i:downto) { return DOWNTO; }
 (?i:array) { return ARRAY; }
-[a-zA-Z]+ { yylval.s = strdup(yytext); return ID; }
-[-+]?[0-9]+(\.[0-9]+)? { yylval.n = atoi(yytext); return NUM; }
+(?i:readln) { return READLN; }
+(?i:writeln) { return WRITELN; }
+
+(?i:integer) { return INTEGERTYPE; }
+(?i:real) { return REALTYPE; }
+(?i:string) { return STRINGTYPE; }
+(?i:boolean) { return BOOLEANTYPE; }
+
+[-+]?[0-9]*\.[0-9]+ { yylval.r = atof(yytext); return REAL; }
+[-+]?[0-9]+ { yylval.i = atoi(yytext); return INTEGER; }
+'([^']+|'')*' { yylval.s = new std::string(yytext); return STRING; }
+[_a-zA-Z][_a-zA-Z0-9]* { yylval.id = new std::string(yytext); return ID; }
+(?i:true) { return TRUE; }
+(?i:false) { return FALSE; }
+
 [ \t\n] { }
 [-<>\.+,()=:;\[\]] { return *yytext; }
 . {
