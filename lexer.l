@@ -46,6 +46,7 @@ identifikuju kao tipovi?
 (?i:string) { return STRINGTYPE; }
 (?i:boolean) { return BOOLEANTYPE; }
 
+\.\. { return *yytext; }
 [-+]?[0-9]*\.[0-9]+ { yylval.r = atof(yytext); return REAL; }
 [-+]?[0-9]+ { yylval.i = atoi(yytext); return INTEGER; }
 '([^']+|'')*' { yylval.s = new std::string(yytext); return STRING; }

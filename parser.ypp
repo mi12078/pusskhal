@@ -30,31 +30,75 @@ block: const_defs type_defs var_decls proc_func_decls stmt_part
 ;
 
 const_defs: CONST const_def_list
+|
 ;
-const_def_list: const_def_list ';' const_def
+const_def_list: const_def_list const_def
 | const_def
 ;
-const_def: ID '=' NUM
+const_def: ID '=' INTEGER ';'
 |
 ;
 
-type_defs: type_def_list ';' type_def
+type_defs: TYPE type_def_list
+|
+;
+type_defs_list: type_def_list type_def
 | type_def
 ;
-type_def: 
-var_decls:
-;
-proc_func_decls:
-;
-stmt_part: compound_statement
+type_def: ID '=' type ';'
+|
 ;
 
+var_decls: VAR var_decl_list
+|
+;
+var_decl_list: var_decl_list var_decl
+| var_decl
+;
+var_decl: var_list ':' type ';'
+|
+;
+var_list: var_list ',' var
+| var
+;
+var: ID
+;
+type: INTEGERTYPE 
+| REALTYPE
+| STRINGTYPE
+| BOOLEANTYPE
+| arraytype
+| ID
+; 
+arraytype: ARRAY range_list OF type
+;
+range_list: range_list ',' range
+| range
+;
+range: '[' id_or_num '.''.' id_or_num ']'
+;
+id_or_num: ID
+| INTEGER
+;
+
+proc_func_decls: proc_func_decls proc_func_decl
+| proc_func_decl
+|
+;
+proc_func_decl : proc_decl
+| func_decl
+;
+proc_decl: PROCEDURE ID /*nastaviti ovde*/
+
+stmt_part: compound_statement
+;
 compound_statement: BEGIN statement_seq END
 ;
 statement_seq: statement_seq ';' statement
 | statement
 ;
 statement:
+| compound_statement
 |
 ;
 
