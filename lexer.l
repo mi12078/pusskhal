@@ -47,12 +47,12 @@ identifikuju kao tipovi?
 (?i:boolean) { return BOOLEANTYPE; }
 
 \.\. { return *yytext; }
+(?i:true) { return TRUE; }
+(?i:false) { return FALSE; }
 [-+]?[0-9]*\.[0-9]+ { yylval.r = atof(yytext); return REAL; }
 [-+]?[0-9]+ { yylval.i = atoi(yytext); return INTEGER; }
 '([^']+|'')*' { yylval.s = new std::string(yytext); return STRING; }
 [_a-zA-Z][_a-zA-Z0-9]* { yylval.id = new std::string(yytext); return ID; }
-(?i:true) { return TRUE; }
-(?i:false) { return FALSE; }
 
 [ \t\n] { }
 [-<>\.+,()=:;\[\]] { return *yytext; }

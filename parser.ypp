@@ -5,6 +5,7 @@
 %token PROGRAM CONST TYPE VAR PROCEDURE BEGIN END WHILE NOT
 %token DO IF OF THEN FOR TO DOWNTO READLN WRITELN
 %token INTEGERTYPE REALTYPE STRINGTYPE BOOLEANTYPE
+%token ARRAY ID INTEGER REAL STRING
 %token TRUE FALSE
 
 %union {
@@ -14,8 +15,16 @@
 	std::string *id;
 }
 
+/*proveriti da li ovo valja*/
+%left '<' '>'
+%left '+' '-'
+%left '*' '/'
+%left ":="
+%left '['
+
 %%
 
+/*program*/
 program: program_heading ';' program_block
 ;
 program_heading: PROGRAM ID
@@ -29,6 +38,7 @@ program_block: block '.'
 block: const_defs type_defs var_decls proc_func_decls stmt_part
 ;
 
+/*constants*/
 const_defs: CONST const_def_list
 |
 ;
@@ -39,16 +49,18 @@ const_def: ID '=' INTEGER ';'
 |
 ;
 
+/*types*/
 type_defs: TYPE type_def_list
 |
 ;
-type_defs_list: type_def_list type_def
+type_def_list: type_def_list type_def
 | type_def
 ;
 type_def: ID '=' type ';'
 |
 ;
 
+/*variables*/
 var_decls: VAR var_decl_list
 |
 ;
@@ -81,15 +93,25 @@ id_or_num: ID
 | INTEGER
 ;
 
+/*procedures & functions*/
 proc_func_decls: proc_func_decls proc_func_decl
 | proc_func_decl
 |
 ;
 proc_func_decl : proc_decl
-| func_decl
+/* | func_decl */
 ;
-proc_decl: PROCEDURE ID /*nastaviti ovde*/
+proc_decl: PROCEDURE ID ';' block
+| PROCEDURE ID '(' proc_func_params ')' block
+;
+proc_func_params: proc_func_params ';' proc_func_param
+| proc_func_param
+;
+proc_func_param: var_list ':' type
+|
+;
 
+/*statements*/
 stmt_part: compound_statement
 ;
 compound_statement: BEGIN statement_seq END
@@ -97,9 +119,53 @@ compound_statement: BEGIN statement_seq END
 statement_seq: statement_seq ';' statement
 | statement
 ;
-statement:
+statement: expr
+| assignment
+| if_stmt
+| for_stmt
+| proc_func_call
 | compound_statement
 |
+;
+
+expr: expr '+' expr
+| expr '-' expr
+| expr '*' expr
+| expr '>' expr
+| expr '<' expr
+| expr '/' expr
+| ID '[' expr ']'
+| ID
+| INTEGER
+| REAL
+| STRING
+| TRUE
+| FALSE 
+;
+
+assignment: ID ':''=' expr
+| ID '[' expr ']' ':''=' expr 
+;
+
+if_stmt: IF expr THEN statement
+;
+
+for_stmt: FOR assignment TO ID id_or_num expr
+| FOR assignment DOWNTO ID id_or_num expr
+;
+
+proc_func_call: ID '(' proc_func_args ')'
+;
+proc_func_args: proc_func_args ',' proc_func_arg
+| proc_func_arg
+;
+proc_func_arg: ID
+| ID '[' expr ']'
+| INTEGER
+| REAL
+| STRING
+| TRUE
+| FALSE
 ;
 
 
