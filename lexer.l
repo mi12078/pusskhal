@@ -2,6 +2,7 @@
 %{
 #include <iostream>
 #include <string>
+#include "parser.tab.hpp"
 
 /*promeniti strdup, vratiti std::string*/
 /*lexer prolazi za primer, za sada*/
@@ -26,7 +27,7 @@ identifikuju kao tipovi?
 (?i:type) { return TYPE; }
 (?i:var) { return VAR; }
 (?i:procedure) { return PROCEDURE; }
-(?i:begin) { return BEGIN; }
+(?i:begin) { return BEGINT; }
 (?i:end) { return END; }
 (?i:while) { return WHILE; }
 (?i:not) { return NOT; }
@@ -38,15 +39,13 @@ identifikuju kao tipovi?
 (?i:to) { return TO; }
 (?i:downto) { return DOWNTO; }
 (?i:array) { return ARRAY; }
-(?i:readln) { return READLN; }
-(?i:writeln) { return WRITELN; }
+(?i:eof) { return EOFT; }
 
 (?i:integer) { return INTEGERTYPE; }
 (?i:real) { return REALTYPE; }
 (?i:string) { return STRINGTYPE; }
 (?i:boolean) { return BOOLEANTYPE; }
 
-\.\. { return *yytext; }
 (?i:true) { return TRUE; }
 (?i:false) { return FALSE; }
 [-+]?[0-9]*\.[0-9]+ { yylval.r = atof(yytext); return REAL; }
@@ -63,8 +62,3 @@ identifikuju kao tipovi?
 
 %%
 
-/*int main()
-{
-	return yylex();
-}
-*/

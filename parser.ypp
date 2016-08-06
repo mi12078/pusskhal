@@ -1,12 +1,24 @@
 %{
+#include <iostream>
+#include <string>
+#include <cstdlib>
 
+#define YYDEBUG 1
+
+extern int yylex();
+
+void yyerror(std::string s)
+{
+	std::cerr << s << std::endl;
+	exit(1);
+}
 %}
 
-%token PROGRAM CONST TYPE VAR PROCEDURE BEGIN END WHILE NOT
+%token PROGRAM CONST TYPE VAR PROCEDURE BEGINT END WHILE NOT
 %token DO IF OF THEN FOR TO DOWNTO READLN WRITELN
 %token INTEGERTYPE REALTYPE STRINGTYPE BOOLEANTYPE
 %token ARRAY ID INTEGER REAL STRING
-%token TRUE FALSE
+%token TRUE FALSE EOFT
 
 %union {
 	int i;
@@ -16,7 +28,7 @@
 }
 
 /*proveriti da li ovo valja*/
-%left '<' '>'
+%left '<' '>' '='
 %left '+' '-'
 %left '*' '/'
 %left ":="
@@ -46,7 +58,6 @@ const_def_list: const_def_list const_def
 | const_def
 ;
 const_def: ID '=' INTEGER ';'
-|
 ;
 
 /*types*/
@@ -57,7 +68,6 @@ type_def_list: type_def_list type_def
 | type_def
 ;
 type_def: ID '=' type ';'
-|
 ;
 
 /*variables*/
@@ -68,7 +78,6 @@ var_decl_list: var_decl_list var_decl
 | var_decl
 ;
 var_decl: var_list ':' type ';'
-|
 ;
 var_list: var_list ',' var
 | var
@@ -94,36 +103,39 @@ id_or_num: ID
 ;
 
 /*procedures & functions*/
-proc_func_decls: proc_func_decls proc_func_decl
-| proc_func_decl
-|
+proc_func_decls: proc_func_decls ';' proc_func_decl 
+| proc_func_decl 
+
 ;
 proc_func_decl : proc_decl
 /* | func_decl */
+|
 ;
-proc_decl: PROCEDURE ID ';' block
-| PROCEDURE ID '(' proc_func_params ')' block
+proc_decl: PROCEDURE ID proc_func_param_list ';' block
+;
+proc_func_param_list : '(' proc_func_params ')'
+|
 ;
 proc_func_params: proc_func_params ';' proc_func_param
 | proc_func_param
 ;
 proc_func_param: var_list ':' type
-|
 ;
 
 /*statements*/
 stmt_part: compound_statement
 ;
-compound_statement: BEGIN statement_seq END
+compound_statement: BEGINT statement_seq END
 ;
 statement_seq: statement_seq ';' statement
 | statement
 ;
-statement: expr
-| assignment
+statement: assignment
 | if_stmt
 | for_stmt
+| while_stmt
 | proc_func_call
+| ID /*poziv fje/proc*/
 | compound_statement
 |
 ;
@@ -131,41 +143,49 @@ statement: expr
 expr: expr '+' expr
 | expr '-' expr
 | expr '*' expr
-| expr '>' expr
-| expr '<' expr
 | expr '/' expr
+| expr '<' expr
+| expr '>' expr
+| TRUE
+| FALSE
 | ID '[' expr ']'
-| ID
+| ID /*moze biti i fja/proc bez args*/
+| proc_func_call
 | INTEGER
 | REAL
 | STRING
+;
+
+bool_rel_expr: NOT bool_rel_expr
+| expr '>' expr
+| expr '<' expr
+| expr '=' expr
 | TRUE
-| FALSE 
+| FALSE
+| EOFT
 ;
 
 assignment: ID ':''=' expr
 | ID '[' expr ']' ':''=' expr 
 ;
 
-if_stmt: IF expr THEN statement
+if_stmt: IF bool_rel_expr THEN statement
 ;
 
-for_stmt: FOR assignment TO ID id_or_num expr
-| FOR assignment DOWNTO ID id_or_num expr
+for_stmt: FOR assignment TO id_or_num DO statement
+| FOR assignment DOWNTO id_or_num DO statement
 ;
 
-proc_func_call: ID '(' proc_func_args ')'
+while_stmt: WHILE bool_rel_expr DO statement
 ;
-proc_func_args: proc_func_args ',' proc_func_arg
+
+proc_func_call: ID '(' proc_func_arg_list ')'
+;
+proc_func_arg_list: proc_func_arg_list ',' proc_func_arg
 | proc_func_arg
 ;
-proc_func_arg: ID
-| ID '[' expr ']'
-| INTEGER
-| REAL
-| STRING
-| TRUE
-| FALSE
+proc_func_arg: expr
+|
 ;
 
 
@@ -173,5 +193,6 @@ proc_func_arg: ID
 
 int main()
 {
+	//yydebug = 1;
 	yyparse();
 }

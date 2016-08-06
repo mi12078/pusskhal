@@ -14,7 +14,7 @@ PROGRAM Sort(input, output);
         arr: IntArrType;
 
     (* Read in the integers. *)
-    PROCEDURE ReadArr(VAR size: Integer; VAR a: IntArrType);
+    PROCEDURE ReadArr((*VAR*) size: Integer; (*VAR*) a: IntArrType);
         BEGIN
             size := 1;
             WHILE NOT eof DO BEGIN
