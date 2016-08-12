@@ -27,6 +27,7 @@ identifikuju kao tipovi?
 (?i:type) { return TYPE; }
 (?i:var) { return VAR; }
 (?i:procedure) { return PROCEDURE; }
+(?i:function) { return FUNCTION; }
 (?i:begin) { return BEGINT; }
 (?i:end) { return END; }
 (?i:while) { return WHILE; }
@@ -48,13 +49,13 @@ identifikuju kao tipovi?
 
 (?i:true) { return TRUE; }
 (?i:false) { return FALSE; }
-[-+]?[0-9]*\.[0-9]+ { yylval.r = atof(yytext); return REAL; }
-[-+]?[0-9]+ { yylval.i = atoi(yytext); return INTEGER; }
 '([^']+|'')*' { yylval.s = new std::string(yytext); return STRING; }
+[-<>\.\+\*\\,()=:;\[\]] { return *yytext; }
+[0-9]*\.[0-9]+ { yylval.r = atof(yytext); return REAL; }
+[0-9]+ { yylval.i = atoi(yytext); return INTEGER; }
 [_a-zA-Z][_a-zA-Z0-9]* { yylval.id = new std::string(yytext); return ID; }
 
 [ \t\n] { }
-[-<>\.+,()=:;\[\]] { return *yytext; }
 . {
 	std::cerr << "Unknown token " << *yytext << ' ' << std::endl;
 	exit(1);
