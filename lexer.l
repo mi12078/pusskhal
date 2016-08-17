@@ -2,6 +2,7 @@
 %{
 #include <iostream>
 #include <string>
+#include <cstdlib>
 #include "parser.tab.hpp"
 
 /*promeniti strdup, vratiti std::string*/

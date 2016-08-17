@@ -2,12 +2,21 @@
 #define _TYPEAST_HPP_ 1
 
 #include <string>
-using namespace std;
+
+enum Type { T_INTEGER, T_REAL, T_STRNG, T_ARRAY };
 
 class TypeAST{
 public:
   virtual void codegen() const = 0;
   virtual ~TypeAST(){}
+};
+
+class BasicType: public TypeAST
+{
+	BasicType(Type t) :_type(t)
+	{}
+private:
+	Type _type;
 };
 
 class IntegerType: public TypeAST{
@@ -19,7 +28,7 @@ public:
     ~IntegerType(){}
 
 private:
-    int _value;
+    Type _type;
 };
 
 class FloatType: public TypeAST{

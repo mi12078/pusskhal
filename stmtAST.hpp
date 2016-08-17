@@ -24,67 +24,66 @@ private:
 };
 class AssignStmtAST: public StmtAST{
 public:
-    AssignStmtAST(ExprAST *ls, ExprAST *rs)
-    :_ls(ls), _rs(rs)
+    AssignStmtAST(ExprAST *lhs, ExprAST *rhs)
+    :_lhs(lhs), _rhs(rhs)
     {}
     void codegen() const;
     ~AssignStmtAST(){
-        delete _ls;
-        delete _rs;
+        delete _lhs;
+        delete _rhs;
     }
 private:
-    ExprAST *_ls,*_rs;
+    ExprAST *_lhs,*_rhs;
 };
 
 class IfStmtAST: public StmtAST{
 public:
-    IfStmtAST(ExprAST *con,CompoundStmtAST *block)
-    :_cond(con), _block(block)
+    IfStmtAST(ExprAST *con,StmtAST *stmt)
+    :_cond(con), _stmt(stmt)
     {}
     void codegen() const;
     ~IfStmtAST(){
         delete _cond;
-        delete _block;
+        delete _stmt;
     }
 private:
     ExprAST *_cond;
-    CompoundStmtAST *_block;
+    StmtAST *_stmt;
 };
 
 class ForStmtAST: public StmtAST{
 public:
     ForStmtAST()
-    :_assign(), _val(), _block()
+    :_assign(AssignStmtAST *a), _val(ExprAST *e), _stmt(StmtAST *s)
     {}
     void codegen() const;
     ~ForStmtAST(){
         delete _assign;
         delete _val;
-        delete _block;
+        delete _stmt;
     }
     
 private:
     AssignStmtAST *_assign;
     ExprAST *_val;
-    CompoundStmtAST *_block;
+    StmtAST *_stmt;
 };
 
 
 class WhileStmtAST: public StmtAST{
 public:
-    WhileStmtAST(ExprAST *cond, CompoundStmtAST *block)
-    :_cond(cond), _block(block)
+    WhileStmtAST(ExprAST *cond, StmtAST *stmt)
+    :_cond(cond), _stmt(stmt)
     {}
     void codegen() const;
     ~WhileStmtAST(){
         delete _cond;
-        delete _block;
+        delete _stmt;
     }
-    
     
 private:
     ExprAST * _cond;
-    CompoundStmtAST *_block;
+    StmtAST *_stmt;
 };
 
 

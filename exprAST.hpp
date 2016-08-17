@@ -3,60 +3,67 @@
 
 #include "typeAST.hpp"
 
-using namespace std;
 
 class ExprAST {
 public:
- virtual void codegen() const = 0;    
- virtual ~ExprAST(){}
+	ExprAST(TypeAST *t)
+		:_type(t)
+	{}
+ 	virtual void codegen() const = 0;    
+	virtual ~ExprAST(){
+		delete _type;
+	}
+private:
+	TypeAST *_type; 
 };
 
+template<typename T>
 class ConstExprAST: public ExprAST{
 public:
-    ConstExprAST(TypeAST *val)
-    :_val(val)
+    ConstExprAST(T v, TypeAST *t)
+    :_val(val), ExprAST(t)
     {}
     void codegen() const;
     ~ConstExprAST(){
         delete _val;
     }
 private:
-    TypeAST *_val;
+    T _val;
 };
 
 
 class VarExprAST: public ExprAST{
 public:
-    VarExprAST(TypeAST *val)
-    :_val(val)
+    VarExprAST(std::string id, TypeAST *t)
+    :_id(id), ExprAST(t)
     {}
     void codegen() const;
     ~VarExprAST(){
-        delete _val;
+        delete _id;
     }
 private:
-    TypeAST *_val;
+    std::string _id;
 };
 
 class BinaryExprAST : public ExprAST{
 public:
-    BinaryExprAST(char op,ExprAST *ls, ExprAST *rs)
-    :_op(op), _ls(ls), _rs(rs)
+    BinaryExprAST(char op,ExprAST *lhs, ExprAST *rhs, TypeAST *t)
+    :_op(op), _lhs(lhs), _rhs(rhs), ExprAST(t)
     {}
     void codegen() const;
     ~BinaryExprAST(){
-        delete _ls;
-        delete _rs;
+        delete _lhs;
+        delete _rhs;
     }
 private:
     char _op;
-    ExprAST *_ls, *_rs;
+    ExprAST *_lhs, *_rhs;
 };
 
 class UnaryExprAST : public ExprAST {
 public:
-    UnaryExprAST(char op, ExprAST *operand)
-    :_operand(operand)
+    UnaryExprAST(char op, ExprAST *operand, TypeAST *t)
+    :_operand(operand), ExprAST(t)
     {}
     void codegen() const;
     ~UnaryExprAST(){
