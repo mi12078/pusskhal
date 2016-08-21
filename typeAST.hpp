@@ -1,89 +1,55 @@
 #ifndef _TYPEAST_HPP_
 #define _TYPEAST_HPP_ 1
 
-#include <string>
 
-enum Type { T_INTEGER, T_REAL, T_STRNG, T_ARRAY };
+enum Type { T_INTEGER = 1, T_REAL, T_CHARACTER,
+			T_BOOLEAN, T_STRING, T_FUNCTION, T_ARRAY };
 
 class TypeAST{
 public:
-  virtual void codegen() const = 0;
+  virtual int type() const = 0;
   virtual ~TypeAST(){}
 };
 
-class BasicType: public TypeAST
-{
-	BasicType(Type t) :_type(t)
-	{}
-private:
-	Type _type;
-};
 
 class IntegerType: public TypeAST{
 public:
-    IntegerType(int value)
-    :_value(value)
-    {}
-    void codegen() const;
-    ~IntegerType(){}
-
-private:
-    Type _type;
+    int type() const;
 };
 
-class FloatType: public TypeAST{
+class RealType: public TypeAST{
 public:
-    FloatType(float value)
-    :_value(value)
-    {}
-    void codegen() const;
-    ~FloatType(){}
-
-private:
-    float _value;
+    int type() const;
 };
 
-class CharType: public TypeAST{
+class CharacterType: public TypeAST{
 public:
-    CharType(char value)
-    :_value(value)
-    {}
-    void codegen() const;
-    ~CharType(){}
-private:
-    char _value;
+    int type() const;
 };
 
-class BoolType: public TypeAST{
+class BooleanType: public TypeAST{
 public:
-    BoolType(bool value)
-    :_value(value)
-    {}
-    void codegen() const;
-    ~BoolType(){}
-private:
-    bool _value;
+    int type() const;
 };
 
 class StringType: public TypeAST{
 public:
-    StringType(string value)
-    :_value(value)
-    {}
-    void codegen() const;
-    ~StringType(){}
-private:
-    string _value;
-    
+    int type() const;
 };
-/*
-//treba dodati ArrayType
+
+class FunctionType: public TypeAST{
+public:
+    int type() const;
+};
+
 class ArrayType: public TypeAST{
 public:
-    ArrayType
-    
+	ArrayType(TypeAST *t) : _elem(t) {}
+    int type() const;
+	~ArrayType() {
+		delete _elem;
+	}
 private:
-    
-    
-};*/
+	TypeAST* _elem;
+};
 #endif

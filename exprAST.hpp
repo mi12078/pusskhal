@@ -20,7 +20,7 @@ private:
 template<typename T>
 class ConstExprAST: public ExprAST{
 public:
-    ConstExprAST(T v, TypeAST *t)
+    ConstExprAST<T>(T v, TypeAST *t)
     :_val(val), ExprAST(t)
     {}
     void codegen() const;

@@ -1,11 +1,15 @@
 %{
 #include <iostream>
 #include <string>
+#include <vector>
 #include <cstdlib>
+#include "symtab.hpp"
 
 #define YYDEBUG 1
 
 extern int yylex();
+
+SymbolTable st = SymbolTable::get();
 
 void yyerror(std::string s)
 {
@@ -21,14 +25,17 @@ void yyerror(std::string s)
 %token TRUE FALSE EOFT
 %token UMINUS
 
+
 %union {
 	int i;
 	double r;
 	std::string *s;
 	std::string *id;
+	std::vector<std::string> *strVec;
 }
 
-/*proveriti da li ovo valja*/
+%type<strVec> var_list
+
 %right ":="
 %left '='
 %left '<' '>'
@@ -87,18 +94,32 @@ var_decl_list: var_decl_list var_decl {
 }
 ;
 var_decl: var_list ':' type ';' {
-
+	switch($3)
+	{
+		case INTEGERTYPE:
+		break;
+		case STRINGTYPE:
+		break;
+		case BOOLEANTYPE:
+		break;
+		case REALTYPE:
+		break;
+		case ARRAYTYPE:
+		break;
+		case INTEGERTYPE:
+		break;
+	}
 }
 ;
-var_list: var_list ',' var {
-
+var_list: var_list ',' ID {
+	$$ = $1;
+	$$->push_back(*$3);
+	delete $3;
 }
-| var {
-
-}
-;
-var: ID {
-
+| ID {
+	$$ = new std::vector<std::string>();
+	$$->push_back(*$1);
+	delete $1;
 }
 
 ;
@@ -194,6 +215,9 @@ bool_rel_expr: NOT bool_rel_expr
 ;
 
 assignment: ID ':''=' expr {
+	/*provera da li je simbol u tablici*/
+	/*kako da znam da li sam u fji?!*/
+	/*provera tipa simbola i tipa rhs*/
 	$$ = new AssignStmtAST($1, $4);
 	delete $1;
 }

@@ -1,20 +1,24 @@
 #include "typeAST.hpp"
-#include <iostream>
-void IntegerType::codegen() const{;
+
+int IntegerType::type() const {
+	return T_INTEGER;
 }
-void FloatType::codegen() const{
-   
+int RealType::type() const {
+	return T_REAL;
+} 
+int CharacterType::type() const {
+	return T_CHARACTER;
+} 
+int BooleanType::type() const {
+	return T_BOOLEAN;
+} 
+int StringType::type() const {
+	return T_STRING;
 }
-void CharType::codegen() const{
+int FunctionType::type() const {
+	return T_FUNCTION;
+}
+int ArrayType::type() const {
+	return T_ARRAY + _elem->type();
     
 }
-void BoolType::codegen() const{
-    
-}
-void StringType::codegen() const{
-    
-}
-/*
-void ArrayType::codegen() const{
-    
-}*/
