@@ -8,6 +8,7 @@
 #include <string>
 #include <stack>
 #include "typeAST.hpp"
+#include "stmtAST.hpp"
 
 
 /*Base class which contains type information*/
@@ -52,8 +53,9 @@ private:
 class FunSym : public SymInfo
 {
 public:
-	FunSym(TypeAST* r, std::vector<std::pair<std::string, TypeAST*> > v)
-		: SymInfo(new FunctionType), _retType(r), _params(v)
+	FunSym(TypeAST* r, std::vector<std::pair<std::string, TypeAST*> > v,
+		std::vector<StmtAST*> s)
+		: SymInfo(new FunctionType), _retType(r), _params(v), _statements(s)
 		{} 
 	~FunSym();
 	TypeAST* returnValue();
@@ -61,6 +63,7 @@ public:
 private:
 	TypeAST* _retType;
 	std::vector<std::pair<std::string,TypeAST*> > _params;
+	std::vector<StmtAST*> _statements;
 };
 
 
@@ -88,7 +91,7 @@ public:
 
 
 	SymbolTable(const SymbolTable& o)
-		: symTab(o.symTab)
+		: _symTab(o._symTab)
 	{}
 private:
 	SymbolTable() {}

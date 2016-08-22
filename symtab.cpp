@@ -1,6 +1,6 @@
 #include "symtab.hpp"
 
-virtual int SymInfo::type()
+int SymInfo::type()
 {
 	return _type->type();
 }
@@ -28,7 +28,7 @@ TypeAST* FunSym::returnValue()
 	return _retType;
 }
 
-static SymbolTable::SymbolTable& get()
+SymbolTable& SymbolTable::get()
 {
 	static SymbolTable s;
 	return s;
@@ -56,7 +56,7 @@ void SymbolTable::insertSymbol(const std::string& name, SymInfo* info)
 
 void SymbolTable::updateSymbol(const std::string& name, SymInfo* info)
 {
-	SymInfo* s = _symTab.searchTable(name);
+	SymInfo* s = SymbolTable::get().searchTable(name);
 	delete s;
 	s = info;
 }

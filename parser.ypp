@@ -164,7 +164,9 @@ proc_func_decl : proc_decl
 ;
 proc_decl: PROCEDURE ID proc_func_param_list ';' block
 ;
-func_decl: FUNCTION ID proc_func_param_list ':' type ';' block
+func_decl: FUNCTION ID proc_func_param_list ':' type ';' block {
+
+}
 ;
 proc_func_param_list : '(' proc_func_params ')'
 |
@@ -189,7 +191,14 @@ statement: assignment
 | while_stmt
 | proc_func_call
 | ID /*poziv fje/proc*/ {
+	SymInfo* i = st.searchTable(*$1);
+	if(i == nullptr)
+		yyerror("Nonexistent function");
 
+	/*postaviti args u info, napraviti stmt*/
+
+
+	delete $1;
 }
 | compound_statement
 |
