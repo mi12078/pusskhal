@@ -86,5 +86,15 @@ private:
     StmtAST *_stmt;
 };
 
+class FnDeclStmtAST : public StmtAST {
+public:
+private:
+};
+
+class FnCallStmtAST : public StmtAST {
+public:
+private:
+};
+
 
 #endif

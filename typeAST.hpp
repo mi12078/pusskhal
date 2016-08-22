@@ -8,42 +8,50 @@ enum Type { T_INTEGER = 1, T_REAL, T_CHARACTER,
 class TypeAST{
 public:
   virtual int type() const = 0;
+  virtual TypeAST* clone() = 0;
   virtual ~TypeAST(){}
 };
 
 
 class IntegerType: public TypeAST{
 public:
+	TypeAST* clone();
     int type() const;
 };
 
 class RealType: public TypeAST{
 public:
+	TypeAST* clone();
     int type() const;
 };
 
 class CharacterType: public TypeAST{
 public:
+	TypeAST* clone();
     int type() const;
 };
 
 class BooleanType: public TypeAST{
 public:
+	TypeAST* clone();
     int type() const;
 };
 
 class StringType: public TypeAST{
 public:
+	TypeAST* clone();
     int type() const;
 };
 
 class FunctionType: public TypeAST{
 public:
+	TypeAST* clone();
     int type() const;
 };
 
 class ArrayType: public TypeAST{
 public:
+	TypeAST* clone();
 	ArrayType(TypeAST *t) : _elem(t) {}
     int type() const;
 	~ArrayType() {
