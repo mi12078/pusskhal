@@ -25,8 +25,14 @@ void yyerror(std::string s)
 	double r;
 	std::string *s;
 	std::string *id;
-	ExprAST* expression;
+	ExprAST *expr;
+	TypeAST *ty;
+	StmtAST *stmt;
 	std::vector<std::string> *strVec;
+	std::vector<StmtAST*> *stmtVec;
+
+	std::vector<std::pair<std::string, TypeAST*> > *pfp;
+	std::vector<std::vector<std::pair<std::string, TypeAST*> > > *pfpl;
 }
 
 %token PROGRAM CONST TYPE VAR PROCEDURE FUNCTION BEGINT END WHILE NOT
@@ -41,7 +47,13 @@ void yyerror(std::string s)
 
 
 %type<strVec> var_list
-%type<expression> expr
+%type<expr> expr
+%type<ty> type;
+%type<pfp> proc_func_param var_decl
+%type<pfpl> proc_func_params proc_func_param_list var_decl_list var_decls
+%type<stmt> statement assignment if_stmt for_stmt while_stmt
+%type<stmt> proc_func_call compound_statement
+%type<stmtVec> statement_seq compound_statement stmt_part 
 
 %right ":="
 %left '='
@@ -64,7 +76,14 @@ program_parameters: program_parameters ',' ID
 ;
 program_block: block '.'
 ;
-block: const_defs type_defs var_decls proc_func_decls stmt_part
+/*shit, pascal allows nested functions...
+ *can we ignore that, since block is used only in the
+ *program block and inside procs/fns? */
+/*consider only vars and stmts part*/
+block: const_defs type_defs var_decls proc_func_decls stmt_part {
+	/*maybe we do insertions here? (ref. var_decl)*/
+	/*do we need to pass anything to $$? proc/func uses block as well; maybe only stmt_part*/
+}
 ;
 
 /*constants*/
@@ -88,19 +107,20 @@ type_def: ID '=' type ';'
 ;
 
 /*variables*/
-var_decls: VAR var_decl_list {
-
-}
-|
+var_decls: VAR var_decl_list { $$ = $1; }
+| { $$ = std::vector<std::vector<std::pair<std::string, TypeAST*> > >(); }
 ;
 var_decl_list: var_decl_list var_decl {
-
+	$$ = $1;
+	$$->push_back(*$2);
 }
 | var_decl {
-
+	$$ = std::vector<std::vector<std::pair<std::string, TypeAST*> > >();
+	$$->push_back(*$1);
 }
 ;
 var_decl: var_list ':' type ';' {
+	/*do we do insertions here, or above?*/
 	switch($3)
 	{
 		case INTEGERTYPE:
@@ -121,26 +141,33 @@ var_decl: var_list ':' type ';' {
 		case INTEGERTYPE:
 		break;
 	}
+	$$ = new std::vector<std::pair<std::string, TypeAST*> >();	
+	for(auto e: *$1)
+		$$->push_back(std::make_pair(e, $3));
+
+	//delete $3;
 }
 ;
 var_list: var_list ',' ID {
 	$$ = $1;
 	$$->push_back(*$3);
-	delete $3;
+	//delete $3;
 }
 | ID {
 	$$ = new std::vector<std::string>();
 	$$->push_back(*$1);
-	delete $1;
+	//delete $1;
 }
 
 ;
-type: INTEGERTYPE 
+type: INTEGERTYPE {
+	$$ = new IntegerType;
+}
 | REALTYPE
 | STRINGTYPE
 | BOOLEANTYPE
 | arraytype
-| ID
+/*| ID */
 ; 
 arraytype: ARRAY range_list OF type
 ;
@@ -165,43 +192,58 @@ proc_func_decl : proc_decl
 proc_decl: PROCEDURE ID proc_func_param_list ';' block
 ;
 func_decl: FUNCTION ID proc_func_param_list ':' type ';' block {
-
+	/*insert vars in symtab*/
+	/*create syntax tree*/
+	/*remove vars from symtab*/
 }
 ;
-proc_func_param_list : '(' proc_func_params ')'
-|
+proc_func_param_list : '(' proc_func_params ')' {
+	$$ = $2;
+}
+| {
+	$$ = new std::vector<std::vector<std::pair<std::string, TypeAST*> > >();
+}
 ;
-proc_func_params: proc_func_params ';' proc_func_param
-| proc_func_param
+proc_func_params: proc_func_params ';' proc_func_param {
+	$$ = $1;
+	$$->push_back(*$3);
+}
+| proc_func_param {
+	$$ = new std::vector<std::vector<std::pair<std::string, TypeAST*> > >();
+	$$->push_back(*$1);
+}
 ;
-proc_func_param: var_list ':' type
+proc_func_param: var_list ':' type {
+	$$ = new std::vector<std::pair<std::string, TypeAST*> >();
+	for(auto e : *$1)
+		$$->push_back(std::make_pair(e, $3);
+}
 ;
 
 /*statements*/
-stmt_part: compound_statement
-;
-compound_statement: BEGINT statement_seq END
-;
-statement_seq: statement_seq ';' statement
-| statement
-;
-statement: assignment
-| if_stmt
-| for_stmt
-| while_stmt
-| proc_func_call
-| ID /*poziv fje/proc*/ {
-	SymInfo* i = st.searchTable(*$1);
-	if(i == nullptr)
-		yyerror("Nonexistent function");
-
-	/*postaviti args u info, napraviti stmt*/
-
-
-	delete $1;
+stmt_part: compound_statement {
+	$$ = $1;
 }
-| compound_statement
-|
+;
+compound_statement: BEGINT statement_seq END {
+	$$ = new CompoundStmtAST(*$2);
+}
+;
+statement_seq: statement_seq ';' statement {
+}
+| statement { 
+	$$ = new std::vector<StmtAST*>();
+	$$->push_back($1);
+}
+;
+statement: assignment { $$ = $1; }
+| if_stmt { $$ = $1; }
+| for_stmt { $$ = $1; }
+| while_stmt { $$ = $1; }
+| proc_func_call { $$ = $1; }
+| ID /*poziv fje/proc*/
+| compound_statement { $$ = $1; }
+| 
 ;
 
 expr: expr '+' expr {
@@ -220,7 +262,8 @@ expr: expr '+' expr {
 | FALSE
 | ID '[' expr ']'
 | ID /*moze biti i fja/proc bez args*/
-| proc_func_call
+| proc_func_call {
+}
 | INTEGER {
 	$$ = new ConstExprAst<int>($1, new IntegerType);
 }
@@ -248,7 +291,7 @@ assignment: ID ':''=' expr {
 		yyerror("Conflicting types");
 
 	$$ = new AssignStmtAST($1, $4);
-	delete $1;
+	//delete $1;
 }
 | ID '[' expr ']' ':''=' expr 
 ;
