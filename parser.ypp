@@ -32,7 +32,6 @@ void yyerror(std::string s)
 	std::vector<StmtAST*> *stmtVec;
 
 	std::vector<std::pair<std::string, TypeAST*> > *pfp;
-	std::vector<std::vector<std::pair<std::string, TypeAST*> > > *pfpl;
 }
 
 %token PROGRAM CONST TYPE VAR PROCEDURE FUNCTION BEGINT END WHILE NOT
@@ -49,8 +48,8 @@ void yyerror(std::string s)
 %type<strVec> var_list
 %type<expr> expr
 %type<ty> type;
-%type<pfp> proc_func_param var_decl
-%type<pfpl> proc_func_params proc_func_param_list var_decl_list var_decls
+%type<pfp> proc_func_param var_decl var_decl_list var_decls 
+%type<pfp> proc_func_params  proc_func_param_list 
 %type<stmt> statement assignment if_stmt for_stmt while_stmt
 %type<stmt> proc_func_call compound_statement
 %type<stmtVec> statement_seq compound_statement stmt_part 
@@ -108,15 +107,18 @@ type_def: ID '=' type ';'
 
 /*variables*/
 var_decls: VAR var_decl_list { $$ = $1; }
-| { $$ = std::vector<std::vector<std::pair<std::string, TypeAST*> > >(); }
+| { $$ = std::vector<std::pair<std::string, TypeAST*> >(); }
 ;
 var_decl_list: var_decl_list var_decl {
 	$$ = $1;
-	$$->push_back(*$2);
+	for(auto e: *$2)
+		$$->push_back(e);
 }
 | var_decl {
-	$$ = std::vector<std::vector<std::pair<std::string, TypeAST*> > >();
-	$$->push_back(*$1);
+	$$ = std::vector<std::pair<std::string, TypeAST*> >();
+	for(auto e: *$1)
+		$$->push_back(e);
+	//delete $1? w8, TypeAST*s would need to be copied then...
 }
 ;
 var_decl: var_list ':' type ';' {
@@ -197,20 +199,18 @@ func_decl: FUNCTION ID proc_func_param_list ':' type ';' block {
 	/*remove vars from symtab*/
 }
 ;
-proc_func_param_list : '(' proc_func_params ')' {
-	$$ = $2;
-}
-| {
-	$$ = new std::vector<std::vector<std::pair<std::string, TypeAST*> > >();
-}
+proc_func_param_list : '(' proc_func_params ')' { $$ = $2; }
+| {	$$ = new std::vector<std::pair<std::string, TypeAST*> >(); }
 ;
 proc_func_params: proc_func_params ';' proc_func_param {
 	$$ = $1;
-	$$->push_back(*$3);
+	for(auto e: *$3)
+		$$->push_back(e);
 }
 | proc_func_param {
-	$$ = new std::vector<std::vector<std::pair<std::string, TypeAST*> > >();
-	$$->push_back(*$1);
+	$$ = new std::vector<std::pair<std::string, TypeAST*> >();
+	for(auto e: *$1)
+		$$->push_back(e);
 }
 ;
 proc_func_param: var_list ':' type {
@@ -226,10 +226,15 @@ stmt_part: compound_statement {
 }
 ;
 compound_statement: BEGINT statement_seq END {
+	/*do we create the node here, or above in the block?
+	 *Presumably we do, compund can appear in other places than
+	 *a function or the program main block.*/
 	$$ = new CompoundStmtAST(*$2);
 }
 ;
 statement_seq: statement_seq ';' statement {
+	$$ = $1;
+	$$->push_back($3);
 }
 | statement { 
 	$$ = new std::vector<StmtAST*>();
