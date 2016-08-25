@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include <cstdlib>
-#include "symtab.hpp"
+#include "symTab.hpp"
 #include "exprAST.hpp"
 #include "stmtAST.hpp"
 
@@ -18,6 +18,12 @@ void yyerror(std::string s)
 	std::cerr << s << std::endl;
 	exit(1);
 }
+
+struct blkStruct
+{
+	std::vector<std::pair<std::string, TypeAST*> > *params;
+	StmtAST *stmts;
+}
 %}
 
 %union {
@@ -30,8 +36,8 @@ void yyerror(std::string s)
 	StmtAST *stmt;
 	std::vector<std::string> *strVec;
 	std::vector<StmtAST*> *stmtVec;
-
 	std::vector<std::pair<std::string, TypeAST*> > *pfp;
+	blkStruct *blks;
 }
 
 %token PROGRAM CONST TYPE VAR PROCEDURE FUNCTION BEGINT END WHILE NOT
@@ -51,8 +57,8 @@ void yyerror(std::string s)
 %type<pfp> proc_func_param var_decl var_decl_list var_decls 
 %type<pfp> proc_func_params  proc_func_param_list 
 %type<stmt> statement assignment if_stmt for_stmt while_stmt
-%type<stmt> proc_func_call compound_statement
-%type<stmtVec> statement_seq compound_statement stmt_part 
+%type<stmt> proc_func_call compound_statement stmt_part
+%type<stmtVec> statement_seq
 
 %right ":="
 %left '='
@@ -80,8 +86,11 @@ program_block: block '.'
  *program block and inside procs/fns? */
 /*consider only vars and stmts part*/
 block: const_defs type_defs var_decls proc_func_decls stmt_part {
-	/*maybe we do insertions here? (ref. var_decl)*/
-	/*do we need to pass anything to $$? proc/func uses block as well; maybe only stmt_part*/
+	/*we need to pass proc_func_decls as well for the main program
+	 *but ignore it when in func_decl?*/
+	$$ = new blkStruct;
+	$$->params = $3;
+	$$->stmts = $5;
 }
 ;
 
@@ -122,31 +131,9 @@ var_decl_list: var_decl_list var_decl {
 }
 ;
 var_decl: var_list ':' type ';' {
-	/*do we do insertions here, or above?*/
-	switch($3)
-	{
-		case INTEGERTYPE:
-			for(auto s=$1.begin(); s!=$1.end(); ++s)
-			{
-				SymInfo *info = new BasicSym<int>(new IntegerType, 0);
-				st.insertSymbol(*s, info);
-			}
-		break;
-		case STRINGTYPE:
-		break;
-		case BOOLEANTYPE:
-		break;
-		case REALTYPE:
-		break;
-		case ARRAYTYPE:
-		break;
-		case INTEGERTYPE:
-		break;
-	}
-	$$ = new std::vector<std::pair<std::string, TypeAST*> >();	
+	$$ = new std::vector<std::pair<std::string, TypeAST*> >();
 	for(auto e: *$1)
 		$$->push_back(std::make_pair(e, $3));
-
 	//delete $3;
 }
 ;
@@ -194,9 +181,13 @@ proc_func_decl : proc_decl
 proc_decl: PROCEDURE ID proc_func_param_list ';' block
 ;
 func_decl: FUNCTION ID proc_func_param_list ':' type ';' block {
-	/*insert vars in symtab*/
-	/*create syntax tree*/
-	/*remove vars from symtab*/
+	/*extract var_decls from block, merge it with
+	 * proc_func_param_list, then passing it to the ctr*/
+	for(auto e: *$7->params)
+	{
+		$3->push_back(e);
+	}
+	$$ = new FnDeclStmtAST(*$2, $3, $5, $7->stmts);
 }
 ;
 proc_func_param_list : '(' proc_func_params ')' { $$ = $2; }
@@ -270,7 +261,7 @@ expr: expr '+' expr {
 | proc_func_call {
 }
 | INTEGER {
-	$$ = new ConstExprAst<int>($1, new IntegerType);
+	$$ = new IntegerExprAst($1, new IntegerType);
 }
 | REAL
 | STRING

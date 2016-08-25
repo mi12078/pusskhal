@@ -1,6 +1,7 @@
 #ifndef _EXPRAST_HPP 
 #define _EXPRAST_HPP 1
 
+#include <string>
 #include "typeAST.hpp"
 
 
@@ -17,20 +18,45 @@ private:
 	TypeAST *_type; 
 };
 
-template<typename T>
-class ConstExprAST: public ExprAST{
+class IntegerExprAST: public ExprAST{
 public:
-    ConstExprAST<T>(T v, TypeAST *t)
-    :_val(val), ExprAST(t)
+    IntegerExprAST(int v, TypeAST *t)
+    :_val(v), ExprAST(t)
     {}
     void codegen() const;
-    ~ConstExprAST(){
-        delete _val;
-    }
 private:
-    T _val;
+    int _val;
 };
 
+class RealExprAST: public ExprAST{
+public:
+    RealExprAST(float v, TypeAST *t)
+    :_val(v), ExprAST(t)
+    {}
+    void codegen() const;
+private:
+    float _val;
+};
+
+class BooleanExprAST: public ExprAST{
+public:
+    BooleanExprAST(bool v, TypeAST *t)
+    :_val(v), ExprAST(t)
+    {}
+    void codegen() const;
+private:
+    bool _val;
+};
+
+class StringExprAST: public ExprAST{
+public:
+    StringExprAST(std::string v, TypeAST *t)
+    :_val(v), ExprAST(t)
+    {}
+    void codegen() const;
+private:
+	std::string _val;
+};
 
 class VarExprAST: public ExprAST{
 public:
@@ -38,9 +64,6 @@ public:
     :_id(id), ExprAST(t)
     {}
     void codegen() const;
-    ~VarExprAST(){
-        delete _id;
-    }
 private:
     std::string _id;
 };

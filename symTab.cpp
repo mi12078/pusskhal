@@ -1,40 +1,4 @@
-#include "symtab.hpp"
-
-int SymInfo::type()
-{
-	return _type->type();
-}
-
-SymInfo::~SymInfo()
-{
-	delete _type;
-}
-
-ArraySym::~ArraySym()
-{
-	for(auto& e: _vec)
-		delete e;
-}
-
-FunSym::~FunSym()
-{
-	delete _retType;
-	for(auto& e: _params)
-		delete e.second;
-}
-
-TypeAST* FunSym::returnValue()
-{
-	return _retType;
-}
-
-SymbolTable& SymbolTable::get()
-{
-	static SymbolTable s;
-	return s;
-}
-
-/**************************************************************/
+#include "symTab.hpp"
 
 SymInfo* SymbolTable::searchTable(const std::string& name)
 {
@@ -49,6 +13,12 @@ SymInfo* SymbolTable::searchTable(const std::string& name)
 
 }
 
+SymbolTable& SymbolTable::get()
+{
+	static SymbolTable s;
+	return s;
+}
+
 void SymbolTable::insertSymbol(const std::string& name, SymInfo* info)
 {
 	_symTab[name].push(info);
@@ -59,4 +29,10 @@ void SymbolTable::updateSymbol(const std::string& name, SymInfo* info)
 	SymInfo* s = SymbolTable::get().searchTable(name);
 	delete s;
 	s = info;
+}
+void SymbolTable::deleteSymbol(const std::string& name)
+{
+	SymInfo* s = SymbolTable::get().searchTable(name);
+	delete s;
+	_symTab[name].pop();
 }

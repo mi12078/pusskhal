@@ -41,5 +41,5 @@ int ArrayType::type() const {
     
 }
 TypeAST* ArrayType::clone() {
-	return new ArrayType;
+	return new ArrayType(_elem);
 }
