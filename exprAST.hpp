@@ -11,6 +11,7 @@ public:
 		:_type(t)
 	{}
  	virtual void codegen() const = 0;    
+	virtual TypeAST* typeCheck() const = 0;
 	virtual ~ExprAST(){
 		delete _type;
 	}
@@ -24,6 +25,7 @@ public:
     :_val(v), ExprAST(t)
     {}
     void codegen() const;
+    TypeAST* typeCheck() const;
 private:
     int _val;
 };
@@ -34,6 +36,7 @@ public:
     :_val(v), ExprAST(t)
     {}
     void codegen() const;
+    TypeAST* typeCheck() const;
 private:
     float _val;
 };
@@ -44,6 +47,7 @@ public:
     :_val(v), ExprAST(t)
     {}
     void codegen() const;
+    TypeAST* typeCheck() const;
 private:
     bool _val;
 };
@@ -54,6 +58,7 @@ public:
     :_val(v), ExprAST(t)
     {}
     void codegen() const;
+    TypeAST* typeCheck() const;
 private:
 	std::string _val;
 };
@@ -64,6 +69,7 @@ public:
     :_id(id), ExprAST(t)
     {}
     void codegen() const;
+    TypeAST* typeCheck() const;
 private:
     std::string _id;
 };
@@ -74,6 +80,7 @@ public:
     :_op(op), _lhs(lhs), _rhs(rhs), ExprAST(t)
     {}
     void codegen() const;
+    TypeAST* typeCheck() const;
     ~BinaryExprAST(){
         delete _lhs;
         delete _rhs;
@@ -89,6 +96,7 @@ public:
     :_operand(operand), ExprAST(t)
     {}
     void codegen() const;
+    TypeAST* typeCheck() const;
     ~UnaryExprAST(){
         delete _operand;
     }

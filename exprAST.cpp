@@ -28,3 +28,40 @@ void BinaryExprAST::codegen() const
 void UnaryExprAST::codegen() const
 {
 }
+
+
+TypeAST* IntegerExprAST::typeCheck() const
+{
+	return _type->type();
+}
+
+TypeAST* RealExprAST::typeCheck() const
+{
+	return _type->type();
+}
+
+TypeAST* BooleanExprAST::typeCheck() const
+{
+	return _type->type();
+}
+
+TypeAST* StringExprAST::typeCheck() const
+{
+	return _type->type();
+}
+
+TypeAST* VarExprAST::typeCheck() const
+{
+	return _type->type();
+}
+
+TypeAST* BinaryExprAST::typeCheck() const
+{
+	if(_lhs->typeCheck->type() != _rhs->typeCheck()->type())
+		return new ErrorType;
+	return new VoidType;
+}
+
+TypeAST* UnaryExprAST::typeCheck() const
+{
+}

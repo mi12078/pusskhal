@@ -8,6 +8,7 @@
 class StmtAST {
 public:
     virtual void codegen() const = 0;
+    virtual TypeAST* typeCheck() const = 0;
     virtual ~StmtAST(){}
 };
 class CompoundStmtAST: public StmtAST{
@@ -16,6 +17,7 @@ public:
     :_v1(v1)
     {}
     void codegen() const;
+    TypeAST* typeCheck() const;
     ~CompoundStmtAST(){
         for(StmtAST* e : _v1)
             delete e;
@@ -29,6 +31,7 @@ public:
     :_lhs(lhs), _rhs(rhs)
     {}
     void codegen() const;
+    TypeAST* typeCheck() const;
     ~AssignmentStmtAST(){
         delete _lhs;
         delete _rhs;
@@ -43,6 +46,7 @@ public:
     :_cond(con), _stmt(stmt)
     {}
     void codegen() const;
+    TypeAST* typeCheck() const;
     ~IfStmtAST(){
         delete _cond;
         delete _stmt;
@@ -58,6 +62,7 @@ public:
     :_assign(a), _val(e), _stmt(s)
     {}
     void codegen() const;
+    TypeAST* typeCheck() const;
     ~ForStmtAST(){
         delete _assign;
         delete _val;
@@ -77,6 +82,7 @@ public:
     :_cond(cond), _stmt(stmt)
     {}
     void codegen() const;
+    TypeAST* typeCheck() const;
     ~WhileStmtAST(){
         delete _cond;
         delete _stmt;
@@ -94,6 +100,7 @@ public:
 		TypeAST* t, StmtAST* b)
 		: _name(n), _localVars(lv), _type(t), _body(b) {}
 	void codegen() const;
+    TypeAST* typeCheck() const;
 private:
 	std::string _name;
 	std::vector<std::pair<std::string, TypeAST*> >_localVars;
@@ -106,6 +113,7 @@ public:
 	FnCallStmtAST(std::vector<ExprAST*> a)
 		: _args(a) {}
 	void codegen() const;
+    TypeAST* typeCheck() const;
 private:
 	std::vector<ExprAST*> _args;
 };
@@ -117,6 +125,7 @@ public:
 	STInsertStmtAST (const std::string& n, SymInfo* i)
 		: _name(n), _info(i) {}
 	void codegen() const;
+    TypeAST* typeCheck() const;
 private:
 	std::string _name;
 	SymInfo *_info;
@@ -127,6 +136,7 @@ public:
 	STUpdateStmtAST(const std::string& n, SymInfo* i)
 		: _name(n), _info(i) {}
 	void codegen() const;
+    TypeAST* typeCheck() const;
 private:
 	std::string _name;
 	SymInfo *_info;
@@ -137,6 +147,7 @@ public:
 	STDeleteStmtAST(const std::string& n)
 		: _name(n) {}
 	void codegen() const;
+    TypeAST* typeCheck() const;
 private:
 	std::string _name;
 };
