@@ -18,7 +18,7 @@ private:
 	TypeAST *_type; 
 };
 
-class IntegerExprAST: public ExprAST{
+class IntegerExprAST: public ExprAST {
 public:
     IntegerExprAST(int v, TypeAST *t)
     :_val(v), ExprAST(t)
@@ -28,7 +28,7 @@ private:
     int _val;
 };
 
-class RealExprAST: public ExprAST{
+class RealExprAST: public ExprAST {
 public:
     RealExprAST(float v, TypeAST *t)
     :_val(v), ExprAST(t)
@@ -38,7 +38,7 @@ private:
     float _val;
 };
 
-class BooleanExprAST: public ExprAST{
+class BooleanExprAST: public ExprAST {
 public:
     BooleanExprAST(bool v, TypeAST *t)
     :_val(v), ExprAST(t)
@@ -48,7 +48,7 @@ private:
     bool _val;
 };
 
-class StringExprAST: public ExprAST{
+class StringExprAST: public ExprAST {
 public:
     StringExprAST(std::string v, TypeAST *t)
     :_val(v), ExprAST(t)
@@ -58,7 +58,7 @@ private:
 	std::string _val;
 };
 
-class VarExprAST: public ExprAST{
+class VarExprAST: public ExprAST {
 public:
     VarExprAST(std::string id, TypeAST *t)
     :_id(id), ExprAST(t)
@@ -68,7 +68,7 @@ private:
     std::string _id;
 };
 
-class BinaryExprAST : public ExprAST{
+class BinaryExprAST : public ExprAST {
 public:
     BinaryExprAST(char op,ExprAST *lhs, ExprAST *rhs, TypeAST *t)
     :_op(op), _lhs(lhs), _rhs(rhs), ExprAST(t)
