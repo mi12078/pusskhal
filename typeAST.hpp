@@ -3,9 +3,9 @@
 
 
 enum Type { T_INTEGER = 1, T_REAL, T_CHARACTER,
-			T_BOOLEAN, T_STRING, T_FUNCTION, T_ARRAY };
+			T_BOOLEAN, T_STRING, T_FUNCTION, T_ERROR, T_VOID, T_ARRAY };
 
-class TypeAST{
+class TypeAST {
 public:
   virtual int type() const = 0;
   virtual TypeAST* clone() = 0;
@@ -13,43 +13,55 @@ public:
 };
 
 
-class IntegerType: public TypeAST{
+class IntegerType: public TypeAST {
 public:
 	TypeAST* clone();
     int type() const;
 };
 
-class RealType: public TypeAST{
+class RealType: public TypeAST {
 public:
 	TypeAST* clone();
     int type() const;
 };
 
-class CharacterType: public TypeAST{
+class CharacterType: public TypeAST {
 public:
 	TypeAST* clone();
     int type() const;
 };
 
-class BooleanType: public TypeAST{
+class BooleanType: public TypeAST {
 public:
 	TypeAST* clone();
     int type() const;
 };
 
-class StringType: public TypeAST{
+class StringType: public TypeAST {
 public:
 	TypeAST* clone();
     int type() const;
 };
 
-class FunctionType: public TypeAST{
+class FunctionType: public TypeAST {
 public:
 	TypeAST* clone();
     int type() const;
 };
 
-class ArrayType: public TypeAST{
+class ErrorType: public TypeAST {
+public:
+	TypeAST* clone();
+    int type() const;
+};
+
+class VoidType: public TypeAST {
+public:
+	TypeAST* clone();
+    int type() const;
+};
+
+class ArrayType: public TypeAST {
 public:
 	TypeAST* clone();
 	ArrayType(TypeAST *t) : _elem(t) {}

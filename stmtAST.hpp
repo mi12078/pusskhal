@@ -103,8 +103,11 @@ private:
 
 class FnCallStmtAST : public StmtAST {
 public:
+	FnCallStmtAST(std::vector<ExprAST*> a)
+		: _args(a) {}
 	void codegen() const;
 private:
+	std::vector<ExprAST*> _args;
 };
 
 /*yet to see if those below are really needed, suspecting the first
