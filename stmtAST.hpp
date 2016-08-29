@@ -118,38 +118,4 @@ private:
 	std::vector<ExprAST*> _args;
 };
 
-/*yet to see if those below are really needed, suspecting the first
- * one will be used when we get to the VAR block*/
-class STInsertStmtAST : public StmtAST {
-public:
-	STInsertStmtAST (const std::string& n, SymInfo* i)
-		: _name(n), _info(i) {}
-	void codegen() const;
-    int typeCheck() const;
-private:
-	std::string _name;
-	SymInfo *_info;
-};
-
-class STUpdateStmtAST : public StmtAST {
-public:
-	STUpdateStmtAST(const std::string& n, SymInfo* i)
-		: _name(n), _info(i) {}
-	void codegen() const;
-    int typeCheck() const;
-private:
-	std::string _name;
-	SymInfo *_info;
-};
-
-class STDeleteStmtAST : public StmtAST {
-public:
-	STDeleteStmtAST(const std::string& n)
-		: _name(n) {}
-	void codegen() const;
-    int typeCheck() const;
-private:
-	std::string _name;
-};
-
 #endif
