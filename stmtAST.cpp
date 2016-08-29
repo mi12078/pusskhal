@@ -29,43 +29,43 @@ void FnCallStmtAST::codegen() const
 }
 
 
-TypeAST* CompoundStmtAST::typeCheck() const
+int CompoundStmtAST::typeCheck() const
 {
 }
 
-TypeAST* AssignmentStmtAST::typeCheck() const
+int AssignmentStmtAST::typeCheck() const
 {
 }
 
-TypeAST* IfStmtAST::typeCheck() const
+int IfStmtAST::typeCheck() const
 {
 }
 
-TypeAST* ForStmtAST::typeCheck() const
+int ForStmtAST::typeCheck() const
 {
 }
 
-TypeAST* WhileStmtAST::typeCheck() const
+int WhileStmtAST::typeCheck() const
 {
 }
 
-TypeAST* FnDeclStmtAST::typeCheck() const
+int FnDeclStmtAST::typeCheck() const
 {
 }
 
-TypeAST* FnCallStmtAST::typeCheck() const
+int FnCallStmtAST::typeCheck() const
 {
 }
 
-TypeAST* STInsertStmtAST::typeCheck() const
+int STInsertStmtAST::typeCheck() const
 {
 }
 
-TypeAST* STUpdateStmtAST::typeCheck() const
+int STUpdateStmtAST::typeCheck() const
 {
 }
 
-TypeAST* STDeleteStmtAST::typeCheck() const
+int STDeleteStmtAST::typeCheck() const
 {
 }
 

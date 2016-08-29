@@ -8,7 +8,7 @@
 class StmtAST {
 public:
     virtual void codegen() const = 0;
-    virtual TypeAST* typeCheck() const = 0;
+    virtual int typeCheck() const = 0;
     virtual ~StmtAST(){}
 };
 class CompoundStmtAST: public StmtAST{
@@ -17,7 +17,7 @@ public:
     :_v1(v1)
     {}
     void codegen() const;
-    TypeAST* typeCheck() const;
+    int typeCheck() const;
     ~CompoundStmtAST(){
         for(StmtAST* e : _v1)
             delete e;
@@ -27,17 +27,17 @@ private:
 };
 class AssignmentStmtAST: public StmtAST{
 public:
-    AssignmentStmtAST(ExprAST *lhs, ExprAST *rhs)
-    :_lhs(lhs), _rhs(rhs)
+    AssignmentStmtAST(const std::string& id, ExprAST *rhs)
+    :_id(id), _rhs(rhs)
     {}
     void codegen() const;
-    TypeAST* typeCheck() const;
+    int typeCheck() const;
     ~AssignmentStmtAST(){
-        delete _lhs;
         delete _rhs;
     }
 private:
-    ExprAST *_lhs,*_rhs;
+	std::string _id;
+    ExprAST *_rhs;
 };
 
 class IfStmtAST: public StmtAST{
@@ -46,7 +46,7 @@ public:
     :_cond(con), _stmt(stmt)
     {}
     void codegen() const;
-    TypeAST* typeCheck() const;
+    int typeCheck() const;
     ~IfStmtAST(){
         delete _cond;
         delete _stmt;
@@ -62,7 +62,7 @@ public:
     :_assign(a), _val(e), _stmt(s)
     {}
     void codegen() const;
-    TypeAST* typeCheck() const;
+    int typeCheck() const;
     ~ForStmtAST(){
         delete _assign;
         delete _val;
@@ -82,7 +82,7 @@ public:
     :_cond(cond), _stmt(stmt)
     {}
     void codegen() const;
-    TypeAST* typeCheck() const;
+    int typeCheck() const;
     ~WhileStmtAST(){
         delete _cond;
         delete _stmt;
@@ -100,7 +100,7 @@ public:
 		TypeAST* t, StmtAST* b)
 		: _name(n), _localVars(lv), _type(t), _body(b) {}
 	void codegen() const;
-    TypeAST* typeCheck() const;
+    int typeCheck() const;
 private:
 	std::string _name;
 	std::vector<std::pair<std::string, TypeAST*> >_localVars;
@@ -113,7 +113,7 @@ public:
 	FnCallStmtAST(std::vector<ExprAST*> a)
 		: _args(a) {}
 	void codegen() const;
-    TypeAST* typeCheck() const;
+    int typeCheck() const;
 private:
 	std::vector<ExprAST*> _args;
 };
@@ -125,7 +125,7 @@ public:
 	STInsertStmtAST (const std::string& n, SymInfo* i)
 		: _name(n), _info(i) {}
 	void codegen() const;
-    TypeAST* typeCheck() const;
+    int typeCheck() const;
 private:
 	std::string _name;
 	SymInfo *_info;
@@ -136,7 +136,7 @@ public:
 	STUpdateStmtAST(const std::string& n, SymInfo* i)
 		: _name(n), _info(i) {}
 	void codegen() const;
-    TypeAST* typeCheck() const;
+    int typeCheck() const;
 private:
 	std::string _name;
 	SymInfo *_info;
@@ -147,7 +147,7 @@ public:
 	STDeleteStmtAST(const std::string& n)
 		: _name(n) {}
 	void codegen() const;
-    TypeAST* typeCheck() const;
+    int typeCheck() const;
 private:
 	std::string _name;
 };

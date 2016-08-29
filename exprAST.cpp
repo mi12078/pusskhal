@@ -30,38 +30,40 @@ void UnaryExprAST::codegen() const
 }
 
 
-TypeAST* IntegerExprAST::typeCheck() const
+int IntegerExprAST::typeCheck() const
 {
 	return _type->type();
 }
 
-TypeAST* RealExprAST::typeCheck() const
+int RealExprAST::typeCheck() const
 {
 	return _type->type();
 }
 
-TypeAST* BooleanExprAST::typeCheck() const
+int BooleanExprAST::typeCheck() const
 {
 	return _type->type();
 }
 
-TypeAST* StringExprAST::typeCheck() const
+int StringExprAST::typeCheck() const
 {
 	return _type->type();
 }
 
-TypeAST* VarExprAST::typeCheck() const
+int VarExprAST::typeCheck() const
 {
+	//do we check for the existence of the variable in the symtab here?
 	return _type->type();
 }
 
-TypeAST* BinaryExprAST::typeCheck() const
+int BinaryExprAST::typeCheck() const
 {
 	if(_lhs->typeCheck->type() != _rhs->typeCheck()->type())
 		return new ErrorType;
 	return new VoidType;
 }
 
-TypeAST* UnaryExprAST::typeCheck() const
+int UnaryExprAST::typeCheck() const
 {
+	return _type->type();
 }
