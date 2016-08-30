@@ -262,8 +262,15 @@ expr: expr '+' expr {
 | '(' expr ')'
 | TRUE
 | FALSE
-| ID '[' expr ']'
-| ID /*moze biti i fja/proc bez args*/
+| ID '[' expr ']' {
+	$$ = new ArrExprAST(*$1, $3, T_VOID/*dummy?*/);
+	delete $1;
+}
+| ID {
+	/*moze biti i fja/proc bez args*/
+	$$ = new VarExprAST(*$1, T_VOID/*dummy?*/);
+	delete $1;
+}
 | proc_func_call {
 }
 | INTEGER { $$ = new IntegerExprAst($1, new IntegerType); }
@@ -281,10 +288,13 @@ bool_rel_expr: NOT bool_rel_expr
 ;
 
 assignment: ID ':''=' expr {
-	$$ = new AssignStmtAST($1, $4);
+	$$ = new AssignmentStmtAST(*$1, $4);
 	//delete $1;
 }
-| ID '[' expr ']' ':''=' expr 
+| ID '[' expr ']' ':''=' expr {
+	$$ = new ArrAssignmentStmtAST(*$1, $3, $7);
+	delete $1;
+}
 ;
 
 if_stmt: IF bool_rel_expr THEN statement
@@ -298,7 +308,8 @@ while_stmt: WHILE bool_rel_expr DO statement
 ;
 
 proc_func_call: ID '(' proc_func_arg_list ')' {
-	$$ = new FnCallStmt(*$3);
+	$$ = new FnCallStmt(*$1, *$3);
+	delete $1;
 }
 ;
 proc_func_arg_list: proc_func_arg_list ',' proc_func_arg {

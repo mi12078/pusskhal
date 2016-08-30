@@ -1,5 +1,9 @@
 #include "symTab.hpp"
 
+/* TODO: see if it is necessary to separate scopes with nullptrs,
+ * if so, reimplement insertion/deletion
+ */
+
 SymInfo* SymbolTable::searchTable(const std::string& name)
 {
 	if(_symTab.find(name) != _symTab.end())

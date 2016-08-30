@@ -10,6 +10,10 @@ void AssignmentStmtAST::codegen() const
 {
 }
 
+void ArrAssignmentStmtAST::codegen() const
+{
+}
+
 void IfStmtAST::codegen() const
 {
 }
@@ -30,6 +34,7 @@ void FnCallStmtAST::codegen() const
 {
 }
 
+/**************************************************************/
 
 int CompoundStmtAST::typeCheck() const
 {
@@ -41,9 +46,36 @@ int CompoundStmtAST::typeCheck() const
 
 int AssignmentStmtAST::typeCheck() const
 {
-	if(st.searchTable(_id) == nullptr)
+	SymInfo* lhs = st.searchTable(_id);
+	int rhs = _rhs->typeCheck();
+	if(lhs == nullptr)
+	{
+		std::cerr << "No symbol named " << _id << std::endl;
 		return T_ERROR;
-	if(_rhs->typeCheck() == T_ERROR)
+	}
+	if(rhs == T_ERROR)
+		return T_ERROR;
+	if(lhs->type() != rhs)
+		return T_ERROR;
+	return T_VOID;
+}
+
+int ArrAssignmentStmtAST::typeCheck() const
+{
+	SymInfo* lhs = st.searchTable(_id);
+	int index = _index->typeCheck();
+	int rhs = _rhs->typeCheck();
+
+	if(lhs == nullptr)
+	{
+		std::cerr << "No symbol named " << _id << std::endl;
+		return T_ERROR;
+	}
+	if(index != T_INTEGER)
+		return T_ERROR;
+	if(rhs == T_ERROR)
+		return T_ERROR;
+	if(lhs->type() != rhs)
 		return T_ERROR;
 	return T_VOID;
 }
@@ -79,6 +111,9 @@ int WhileStmtAST::typeCheck() const
 
 int FnDeclStmtAST::typeCheck() const
 {
+	/* TODO: check if symbol having the same name as fn already exists,
+	 * insert localvars in symtab, remove them at the end of the fn
+	 */
 	for(auto e : _body)
 		if(e->typeCheck() == T_ERROR)
 			return T_ERROR;
@@ -87,6 +122,12 @@ int FnDeclStmtAST::typeCheck() const
 
 int FnCallStmtAST::typeCheck() const
 {
+	SymInfo* name = st.searchTable(_name);
+	if(name == nullptr)
+	{
+		std::cerr << "No symbol named " << name << std::endl;
+		return T_ERROR;
+	}
 	for(auto e : _args)
 		if(e->typeCheck() == T_ERROR)
 			return T_ERROR;

@@ -74,6 +74,18 @@ private:
     std::string _id;
 };
 
+class ArrExprAST: public ExprAST {
+public:
+    ArrExprAST(std::string id, ExprAST* i,  TypeAST *t)
+    :_id(id), _index(i),  ExprAST(t)
+    {}
+    void codegen() const;
+    int typeCheck() const;
+private:
+    std::string _id;
+	ExprAST* _index;
+};
+
 class BinaryExprAST : public ExprAST {
 public:
     BinaryExprAST(char op,ExprAST *lhs, ExprAST *rhs, TypeAST *t)

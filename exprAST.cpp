@@ -1,6 +1,9 @@
 #include "exprAST.hpp"
 #include <iostream>
 
+extern SymbolTable st;
+/*will probably need an include or a fwd declaration here...*/
+
 void IntegerExprAST::codegen() const
 {
 }
@@ -53,14 +56,37 @@ int StringExprAST::typeCheck() const
 int VarExprAST::typeCheck() const
 {
 	//do we check for the existence of the variable in the symtab here?
-	return _type->type();
+	SymInfo* entry = st.searchTable(_id);
+	if(entry)
+		return entry->type();
+	else
+	{
+		std::cerr << "No symbol named " << _id << std::endl;
+		return T_ERROR;
+	}
+}
+
+int ArrExprAST::typeCheck() const
+{
+	SymInfo* entry = st.searchTable(_id);
+	if(entry == nullptr)
+	{
+		std::cerr << "No symbol named " << _id << std::endl;
+		return T_ERROR;
+	}
+	else if(_index->typeCheck() != T_INTEGER)
+		return T_ERROR;
+
+	return entry->type();
 }
 
 int BinaryExprAST::typeCheck() const
 {
 	if(_lhs->typeCheck->type() != _rhs->typeCheck()->type())
-		return new ErrorType;
-	return new VoidType;
+		return new T_ERROR;
+	if(_lhs->typeCheck->type() == T_ERROR || _rhs->typeCheck()->type() == T_ERROR)
+		return new T_ERROR;
+	return _lhs->type();
 }
 
 int UnaryExprAST::typeCheck() const

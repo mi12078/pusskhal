@@ -40,6 +40,23 @@ private:
     ExprAST *_rhs;
 };
 
+class ArrAssignmentStmtAST: public StmtAST{
+public:
+    ArrAssignmentStmtAST(const std::string& id, ExprAST* index, ExprAST *rhs)
+    :_id(id), _index(index), _rhs(rhs)
+    {}
+    void codegen() const;
+    int typeCheck() const;
+    ~ArrAssignmentStmtAST(){
+        delete _index;
+        delete _rhs;
+    }
+private:
+	std::string _id;
+    ExprAST *_index;
+    ExprAST *_rhs;
+};
+
 class IfStmtAST: public StmtAST{
 public:
     IfStmtAST(ExprAST *con, StmtAST *stmt)
@@ -110,11 +127,12 @@ private:
 
 class FnCallStmtAST : public StmtAST {
 public:
-	FnCallStmtAST(std::vector<ExprAST*> a)
-		: _args(a) {}
+	FnCallStmtAST(const std::string& n, std::vector<ExprAST*> a)
+		: _name(n), _args(a) {}
 	void codegen() const;
     int typeCheck() const;
 private:
+	std::string _name;
 	std::vector<ExprAST*> _args;
 };
 
