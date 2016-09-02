@@ -3,7 +3,6 @@
 
 #include <vector>
 #include "exprAST.hpp"
-#include "symInfo.hpp"
 
 class StmtAST {
 public:
@@ -121,7 +120,7 @@ public:
 private:
 	std::string _name;
 	std::vector<std::pair<std::string, TypeAST*> >_localVars;
-	TypeAST* _type;
+	TypeAST* _retType;
 	StmtAST* _body;
 };
 

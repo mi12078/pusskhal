@@ -1,13 +1,8 @@
 #include "symTab.hpp"
 
-/* TODO: see if it is necessary to separate scopes with nullptrs,
- * if so, reimplement insertion/deletion
- */
-
-SymInfo* SymbolTable::searchTable(const std::string& name)
+TypeAST* SymbolTable::searchTable(const std::string& name)
 {
 	if(_symTab.find(name) != _symTab.end())
-		/*Is this check needed?*/
 		if(!_symTab[name].empty())
 			return _symTab[name].top();
 		else
@@ -23,20 +18,20 @@ SymbolTable& SymbolTable::get()
 	return s;
 }
 
-void SymbolTable::insertSymbol(const std::string& name, SymInfo* info)
+void SymbolTable::insertSymbol(const std::string& name, TypeAST* info)
 {
 	_symTab[name].push(info);
 }
 
-void SymbolTable::updateSymbol(const std::string& name, SymInfo* info)
-{
-	SymInfo* s = SymbolTable::get().searchTable(name);
-	delete s;
-	s = info;
-}
 void SymbolTable::deleteSymbol(const std::string& name)
 {
-	SymInfo* s = SymbolTable::get().searchTable(name);
+	TypeAST* s = SymbolTable::get().searchTable(name);
+	/*Is this the correct way to delete?*/
 	delete s;
 	_symTab[name].pop();
+	/* if we only call this fn from a fndeclstmtast fn, there will
+	 * always be an underlying nullptr, thus we needn't make the check?
+	 */
+	if(_symTab[name].top() == nullptr)
+		_symTab[name].pop();
 }

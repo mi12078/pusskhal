@@ -41,11 +41,11 @@ TypeAST* StringType::clone() {
 }
 
 int FunctionType::type() const {
-	return T_FUNCTION;
+	return _ret->type();
 }
 
 TypeAST* FunctionType::clone() {
-	return new FunctionType;
+	return new FunctionType(_retType, _params);
 }
 
 int ArrayType::type() const {

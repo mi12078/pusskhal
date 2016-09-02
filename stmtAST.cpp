@@ -46,7 +46,7 @@ int CompoundStmtAST::typeCheck() const
 
 int AssignmentStmtAST::typeCheck() const
 {
-	SymInfo* lhs = st.searchTable(_id);
+	TypeAST* lhs = st.searchTable(_id);
 	int rhs = _rhs->typeCheck();
 	if(lhs == nullptr)
 	{
@@ -62,7 +62,7 @@ int AssignmentStmtAST::typeCheck() const
 
 int ArrAssignmentStmtAST::typeCheck() const
 {
-	SymInfo* lhs = st.searchTable(_id);
+	TypeAST* lhs = st.searchTable(_id);
 	int index = _index->typeCheck();
 	int rhs = _rhs->typeCheck();
 
@@ -111,18 +111,54 @@ int WhileStmtAST::typeCheck() const
 
 int FnDeclStmtAST::typeCheck() const
 {
-	/* TODO: check if symbol having the same name as fn already exists,
-	 * insert localvars in symtab, remove them at the end of the fn
+	/* TODO: insert a symbol named the same as the fn, which will be
+	 * used for the returning of a value
 	 */
+	int retVal;
+
+	if(st.searchTable(_name))
+	{
+		std::cerr << "Can't declare fn " << _name;
+		std::cerr << ", symbol already exists" << std::endl;
+		return T_ERROR;
+	}
+	st.insertSymbol(_name, new FunctionType(_retType, _localvars));
+
+	/*placing nullptrs as a scope separator*/
+	for(auto e : _localVars)
+		st.insertSymbol(e.first, nullptr);
+
+	/*placing the actual symbol info*/
+	for(auto e : _localVars)
+	{
+		if(st.searchTable(e.first))
+		{
+			/*var with the same name has already been inserted*/
+			std::cerr << "Multiple variable declaration in ";
+			std::cerr << " function " << _name << std::endl;
+			return T_ERROR;
+		}
+		st.insertSymbol(e.first, e.second);
+	}
+
+	retVal = T_VOID;
+
 	for(auto e : _body)
 		if(e->typeCheck() == T_ERROR)
-			return T_ERROR;
-	return T_VOID;
+		{
+			retVal = T_ERROR;
+			break;
+		}
+
+	for(auto e : _localVars)
+		st.deleteSymbol(e.first);
+
+	return retVal;
 }
 
 int FnCallStmtAST::typeCheck() const
 {
-	SymInfo* name = st.searchTable(_name);
+	TypeAST* s = st.searchTable(_name);
 	if(name == nullptr)
 	{
 		std::cerr << "No symbol named " << name << std::endl;
@@ -131,5 +167,5 @@ int FnCallStmtAST::typeCheck() const
 	for(auto e : _args)
 		if(e->typeCheck() == T_ERROR)
 			return T_ERROR;
-	return T_VOID;
+	return s->type();
 }

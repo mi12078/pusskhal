@@ -56,7 +56,7 @@ int StringExprAST::typeCheck() const
 int VarExprAST::typeCheck() const
 {
 	//do we check for the existence of the variable in the symtab here?
-	SymInfo* entry = st.searchTable(_id);
+	TypeAST* entry = st.searchTable(_id);
 	if(entry)
 		return entry->type();
 	else
@@ -68,7 +68,7 @@ int VarExprAST::typeCheck() const
 
 int ArrExprAST::typeCheck() const
 {
-	SymInfo* entry = st.searchTable(_id);
+	TypeAST* entry = st.searchTable(_id);
 	if(entry == nullptr)
 	{
 		std::cerr << "No symbol named " << _id << std::endl;

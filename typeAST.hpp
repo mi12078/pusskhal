@@ -1,9 +1,10 @@
 #ifndef _TYPEAST_HPP_
 #define _TYPEAST_HPP_ 1
 
+/*TODO: check if we really need copy ctors here*/
 
 enum Type { T_INTEGER = 1, T_REAL, T_CHARACTER,
-			T_BOOLEAN, T_STRING, T_FUNCTION, T_ERROR, T_VOID, T_ARRAY };
+			T_BOOLEAN, T_STRING, T_ERROR, T_VOID, T_ARRAY };
 
 class TypeAST {
 public:
@@ -45,8 +46,19 @@ public:
 
 class FunctionType: public TypeAST {
 public:
+	FunctionType(TypeAST* t, std::vector<std::pair<std::string, TypeAST*> > v)
+		: _retType(t), _params(v) {}
 	TypeAST* clone();
     int type() const;
+	~FunctionType()
+	{
+		delete _retType;
+		for(auto e : _params)
+			delete e.second;
+	}
+private:
+	TypeAST* _retType;
+	std::vector<std::pair<std::string,TypeAST*> > _params;
 };
 
 class ErrorType: public TypeAST {
