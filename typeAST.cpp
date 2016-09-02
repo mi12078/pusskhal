@@ -41,7 +41,7 @@ TypeAST* StringType::clone() {
 }
 
 int FunctionType::type() const {
-	return _ret->type();
+	return _retType->type();
 }
 
 TypeAST* FunctionType::clone() {

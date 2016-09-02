@@ -1,5 +1,7 @@
-#include "exprAST.hpp"
 #include <iostream>
+#include "exprAST.hpp"
+#include "symTab.hpp"
+
 
 extern SymbolTable st;
 /*will probably need an include or a fwd declaration here...*/
@@ -82,11 +84,12 @@ int ArrExprAST::typeCheck() const
 
 int BinaryExprAST::typeCheck() const
 {
-	if(_lhs->typeCheck->type() != _rhs->typeCheck()->type())
-		return new T_ERROR;
-	if(_lhs->typeCheck->type() == T_ERROR || _rhs->typeCheck()->type() == T_ERROR)
-		return new T_ERROR;
-	return _lhs->type();
+	int retVal;
+	if((retVal = _lhs->typeCheck()) != _rhs->typeCheck())
+		return T_ERROR;
+	if(_lhs->typeCheck() == T_ERROR || _rhs->typeCheck() == T_ERROR)
+		return T_ERROR;
+	return retVal;
 }
 
 int UnaryExprAST::typeCheck() const

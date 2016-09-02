@@ -114,7 +114,7 @@ public:
 	FnDeclStmtAST(const std::string& n,
 		std::vector<std::pair<std::string, TypeAST*> > lv,
 		TypeAST* t, StmtAST* b)
-		: _name(n), _localVars(lv), _type(t), _body(b) {}
+		: _name(n), _localVars(lv), _retType(t), _body(b) {}
 	void codegen() const;
     int typeCheck() const;
 private:

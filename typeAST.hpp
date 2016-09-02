@@ -1,5 +1,7 @@
 #ifndef _TYPEAST_HPP_
 #define _TYPEAST_HPP_ 1
+#include <vector>
+#include <string>
 
 /*TODO: check if we really need copy ctors here*/
 

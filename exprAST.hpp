@@ -15,7 +15,7 @@ public:
 	virtual ~ExprAST(){
 		delete _type;
 	}
-private:
+protected:
 	TypeAST *_type; 
 };
 

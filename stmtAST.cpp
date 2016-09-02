@@ -1,4 +1,6 @@
+#include <iostream>
 #include "stmtAST.hpp"
+#include "symTab.hpp"
 
 extern SymbolTable st;
 
@@ -122,7 +124,7 @@ int FnDeclStmtAST::typeCheck() const
 		std::cerr << ", symbol already exists" << std::endl;
 		return T_ERROR;
 	}
-	st.insertSymbol(_name, new FunctionType(_retType, _localvars));
+	st.insertSymbol(_name, new FunctionType(_retType, _localVars));
 
 	/*placing nullptrs as a scope separator*/
 	for(auto e : _localVars)
@@ -141,14 +143,7 @@ int FnDeclStmtAST::typeCheck() const
 		st.insertSymbol(e.first, e.second);
 	}
 
-	retVal = T_VOID;
-
-	for(auto e : _body)
-		if(e->typeCheck() == T_ERROR)
-		{
-			retVal = T_ERROR;
-			break;
-		}
+	retVal = _body->typeCheck() == T_ERROR ? T_ERROR : T_VOID;
 
 	for(auto e : _localVars)
 		st.deleteSymbol(e.first);
@@ -159,9 +154,9 @@ int FnDeclStmtAST::typeCheck() const
 int FnCallStmtAST::typeCheck() const
 {
 	TypeAST* s = st.searchTable(_name);
-	if(name == nullptr)
+	if(s == nullptr)
 	{
-		std::cerr << "No symbol named " << name << std::endl;
+		std::cerr << "No symbol named " << s << std::endl;
 		return T_ERROR;
 	}
 	for(auto e : _args)
