@@ -48,6 +48,11 @@ TypeAST* FunctionType::clone() {
 	return new FunctionType(_retType, _params);
 }
 
+std::vector<std::pair<std::string,TypeAST*> > params() const
+{
+	return _params;
+}
+
 int ArrayType::type() const {
 	return T_ARRAY + _elem->type();
 }

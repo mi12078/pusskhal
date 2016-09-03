@@ -159,8 +159,26 @@ int FnCallStmtAST::typeCheck() const
 		std::cerr << "No symbol named " << s << std::endl;
 		return T_ERROR;
 	}
-	for(auto e : _args)
-		if(e->typeCheck() == T_ERROR)
+
+	auto params = s->params();
+
+	if(params.size() != _args.size())
+	{
+		std::cerr << "Invalid no. of args specified" << std::endl;
+		return T_ERROR;
+	}
+
+	for(auto it1=_args.begin(), it2=params.begin(); it1!=_args.end(); ++it1, ++it2)
+	{
+		int arg = it1->second.typeCheck();
+		int param = it2->second.typeCheck();
+
+		if((arg == T_ERROR) || (arg != param))
+		{
+			std::cerr << "Invalid argument type" << std::cerr;
 			return T_ERROR;
+		}
+	}
+
 	return s->type();
 }

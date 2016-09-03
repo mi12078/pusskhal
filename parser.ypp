@@ -244,7 +244,7 @@ statement: assignment { $$ = $1; }
 ;
 
 expr: expr '+' expr {
-	$$ = new BinaryExprAST('+', $1, $3, tmp);
+	$$ = new BinaryExprAST('+', $1, $3);
 }
 | expr '-' expr
 | expr '*' expr
@@ -256,12 +256,12 @@ expr: expr '+' expr {
 | TRUE
 | FALSE
 | ID '[' expr ']' {
-	$$ = new ArrExprAST(*$1, $3, T_VOID/*dummy?*/);
+	$$ = new ArrExprAST(*$1, $3);
 	delete $1;
 }
 | ID {
 	/*moze biti i fja/proc bez args*/
-	$$ = new VarExprAST(*$1, T_VOID/*dummy?*/);
+	$$ = new VarExprAST(*$1);
 	delete $1;
 }
 | proc_func_call {

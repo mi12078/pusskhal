@@ -52,6 +52,7 @@ public:
 		: _retType(t), _params(v) {}
 	TypeAST* clone();
     int type() const;
+	std::vector<std::pair<std::string,TypeAST*> > params() const;
 	~FunctionType()
 	{
 		delete _retType;
