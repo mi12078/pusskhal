@@ -160,7 +160,7 @@ int FnCallStmtAST::typeCheck() const
 		return T_ERROR;
 	}
 
-	auto params = s->params();
+	auto params = dynamic_cast<FunctionType*>(s)->params();
 
 	if(params.size() != _args.size())
 	{
@@ -168,14 +168,17 @@ int FnCallStmtAST::typeCheck() const
 		return T_ERROR;
 	}
 
-	for(auto it1=_args.begin(), it2=params.begin(); it1!=_args.end(); ++it1, ++it2)
+	std::vector<ExprAST*>::const_iterator it1;
+	std::vector<std::pair<std::string, TypeAST*> >::iterator it2;
+
+	for(it1=_args.begin(), it2=params.begin(); it1!=_args.end(); ++it1, ++it2)
 	{
-		int arg = it1->second.typeCheck();
-		int param = it2->second.typeCheck();
+		int arg = (*it1)->typeCheck();
+		int param = it2->second->type();
 
 		if((arg == T_ERROR) || (arg != param))
 		{
-			std::cerr << "Invalid argument type" << std::cerr;
+			std::cerr << "Invalid argument type" << std::endl;
 			return T_ERROR;
 		}
 	}
