@@ -94,5 +94,6 @@ int BinaryExprAST::typeCheck() const
 
 int UnaryExprAST::typeCheck() const
 {
-	return _type->type();
+	int retVal;
+	return (retVal = _operand->typeCheck()) == T_ERROR ? T_ERROR : retVal;
 }

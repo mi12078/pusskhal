@@ -7,66 +7,74 @@
 
 class ExprAST {
 public:
-	ExprAST(TypeAST *t)
-		:_type(t)
-	{}
  	virtual void codegen() const = 0;    
 	virtual int typeCheck() const = 0;
-	virtual ~ExprAST(){
-		delete _type;
-	}
-protected:
-	TypeAST *_type; 
 };
 
 class IntegerExprAST: public ExprAST {
 public:
     IntegerExprAST(int v, TypeAST *t)
-    :_val(v), ExprAST(t)
+    :_val(v), _type(t)
     {}
     void codegen() const;
     int typeCheck() const;
+	~IntegerExprAST(){
+		delete _type;
+	}
 private:
     int _val;
+	TypeAST *_type; 
 };
 
 class RealExprAST: public ExprAST {
 public:
     RealExprAST(float v, TypeAST *t)
-    :_val(v), ExprAST(t)
+    :_val(v), _type(t)
     {}
     void codegen() const;
     int typeCheck() const;
+	~RealExprAST(){
+		delete _type;
+	}
 private:
     float _val;
+	TypeAST *_type; 
 };
 
 class BooleanExprAST: public ExprAST {
 public:
     BooleanExprAST(bool v, TypeAST *t)
-    :_val(v), ExprAST(t)
+    :_val(v), _type(t)
     {}
     void codegen() const;
     int typeCheck() const;
+	~BooleanExprAST(){
+		delete _type;
+	}
 private:
     bool _val;
+	TypeAST *_type; 
 };
 
 class StringExprAST: public ExprAST {
 public:
     StringExprAST(std::string v, TypeAST *t)
-    :_val(v), ExprAST(t)
+    :_val(v), _type(t)
     {}
     void codegen() const;
     int typeCheck() const;
+	~StringExprAST(){
+		delete _type;
+	}
 private:
 	std::string _val;
+	TypeAST *_type; 
 };
 
 class VarExprAST: public ExprAST {
 public:
-    VarExprAST(std::string id, TypeAST *t)
-    :_id(id), ExprAST(t)
+    VarExprAST(std::string id)
+    :_id(id)
     {}
     void codegen() const;
     int typeCheck() const;
@@ -76,8 +84,8 @@ private:
 
 class ArrExprAST: public ExprAST {
 public:
-    ArrExprAST(std::string id, ExprAST* i,  TypeAST *t)
-    :_id(id), _index(i),  ExprAST(t)
+    ArrExprAST(std::string id, ExprAST* i)
+    :_id(id), _index(i)
     {}
     void codegen() const;
     int typeCheck() const;
@@ -88,8 +96,8 @@ private:
 
 class BinaryExprAST : public ExprAST {
 public:
-    BinaryExprAST(char op,ExprAST *lhs, ExprAST *rhs, TypeAST *t)
-    :_op(op), _lhs(lhs), _rhs(rhs), ExprAST(t)
+    BinaryExprAST(char op, ExprAST *lhs, ExprAST *rhs)
+    :_op(op), _lhs(lhs), _rhs(rhs)
     {}
     void codegen() const;
     int typeCheck() const;
@@ -104,8 +112,8 @@ private:
 
 class UnaryExprAST : public ExprAST {
 public:
-    UnaryExprAST(char op, ExprAST *operand, TypeAST *t)
-    :_operand(operand), ExprAST(t)
+    UnaryExprAST(char op, ExprAST *operand)
+    :_operand(operand)
     {}
     void codegen() const;
     int typeCheck() const;

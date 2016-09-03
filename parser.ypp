@@ -175,7 +175,7 @@ proc_func_decls: proc_func_decls ';' proc_func_decl
 | proc_func_decl 
 
 ;
-proc_func_decl : proc_decl { $$ = $1; }
+proc_func_decl : func_decl { $$ = $1; }
 /*| proc_decl*/
 |
 ;
@@ -184,7 +184,7 @@ proc_decl: PROCEDURE ID proc_func_param_list ';' block
 func_decl: FUNCTION ID proc_func_param_list ':' type ';' block {
 	/*extract var_decls from block, merge it with
 	 * proc_func_param_list, then passing it to the ctr*/
-	for(auto e: *$7->params)
+	for(auto e: (*$7)->params)
 	{
 		$3->push_back(e);
 	}
@@ -244,13 +244,6 @@ statement: assignment { $$ = $1; }
 ;
 
 expr: expr '+' expr {
-	TypeAST *tmp;
-
-	if($1->type() == $2->type())
-		tmp = $1->clone();
-	else
-		tmp = new ErrorType;
-
 	$$ = new BinaryExprAST('+', $1, $3, tmp);
 }
 | expr '-' expr
