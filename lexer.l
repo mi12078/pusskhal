@@ -49,7 +49,13 @@ struct blkStruct;
 
 (?i:true) { return TRUE; }
 (?i:false) { return FALSE; }
-'([^']+|'')*' { yylval.s = new std::string(yytext); return STRING; }
+'([^']+|'')*' {
+	std::string tmp(yytext);
+	tmp.erase(tmp.begin());
+	tmp.erase(tmp.end()-1);
+	yylval.s = new std::string(tmp);
+	return STRING;
+}
 [-<>\.\+\*\\,()=:;\[\]] { return *yytext; }
 [0-9]*\.[0-9]+ { yylval.r = atof(yytext); return REAL; }
 [0-9]+ { yylval.i = atoi(yytext); return INTEGER; }

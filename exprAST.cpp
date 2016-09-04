@@ -83,7 +83,10 @@ int ArrExprAST::typeCheck() const
 		return T_ERROR;
 	}
 	else if(_index->typeCheck() != T_INTEGER)
+	{
+		std::cerr << "Array index is not an integer type" << std::endl;
 		return T_ERROR;
+	}
 
 	return entry->type();
 }
@@ -92,9 +95,16 @@ int BinaryExprAST::typeCheck() const
 {
 	int retVal;
 	if((retVal = _lhs->typeCheck()) != _rhs->typeCheck())
+	{
+		std::cerr << "LHS RHS type mismatch (BinaryExprAST)" << std::endl;
 		return T_ERROR;
+	}
 	if(_lhs->typeCheck() == T_ERROR || _rhs->typeCheck() == T_ERROR)
+	{
+		std::cerr << "Either RHS or LHS of a binary expr is ill-formed";
+		std::cerr << std::endl;
 		return T_ERROR;
+	}
 	return retVal;
 }
 

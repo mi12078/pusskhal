@@ -66,9 +66,15 @@ int AssignmentStmtAST::typeCheck() const
 		return T_ERROR;
 	}
 	if(rhs == T_ERROR)
+	{
+		std::cerr << "RHS of an assignment ill-formed" << std::endl;
 		return T_ERROR;
+	}
 	if(lhs->type() != rhs)
+	{
+		std::cerr << "LHS RHS type mismatch" << std::endl;
 		return T_ERROR;
+	}
 	return T_VOID;
 }
 
@@ -178,6 +184,7 @@ int FnCallStmtAST::typeCheck() const
 
 	/*since we want writeln to have a variadic no. of args, we omit checking*/
 	if(_name != "writeln")
+	{
 		if(params.size() != _args.size())
 		{
 			std::cerr << "Invalid no. of args specified";
@@ -185,19 +192,36 @@ int FnCallStmtAST::typeCheck() const
 			return T_ERROR;
 		}
 
-	std::vector<ExprAST*>::const_iterator it1;
-	std::vector<std::pair<std::string, TypeAST*> >::iterator it2;
+		std::vector<ExprAST*>::const_iterator it1;
+		std::vector<std::pair<std::string, TypeAST*> >::iterator it2;
 
-	for(it1=_args.begin(), it2=params.begin(); it1!=_args.end(); ++it1, ++it2)
-	{
-		int arg = (*it1)->typeCheck();
-		int param = it2->second->type();
-
-		if((arg == T_ERROR) || (arg != param))
+		for(it1=_args.begin(), it2=params.begin(); it1!=_args.end(); ++it1, ++it2)
 		{
-			std::cerr << "Invalid argument type" << std::endl;
-			std::cerr << " (FnCallStmtAST)" << std::endl;
-			return T_ERROR;
+			int arg = (*it1)->typeCheck();
+			int param = it2->second->type();
+
+			if((arg == T_ERROR) || (arg != param))
+			{
+				std::cerr << "Invalid argument type" << std::endl;
+				std::cerr << " (FnCallStmtAST)" << std::endl;
+				return T_ERROR;
+			}
+		}
+	}
+	else
+	{
+		std::vector<ExprAST*>::const_iterator it1;
+
+		for(it1=_args.begin(); it1!=_args.end(); ++it1)
+		{
+			int arg = (*it1)->typeCheck();
+
+			if(arg == T_ERROR)
+			{
+				std::cerr << "Invalid argument type" << std::endl;
+				std::cerr << " (FnCallStmtAST#2)" << std::endl;
+				return T_ERROR;
+			}
 		}
 	}
 

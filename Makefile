@@ -1,20 +1,21 @@
 PROG=prog
+CFLAGS=-g
 CXXFLAGS=-std=c++11
 
 $(PROG): parser.tab.o lex.yy.o typeAST.o symTab.o exprAST.o stmtAST.o
 	g++ -o $@ $^
 
 stmtAST.o: stmtAST.cpp stmtAST.hpp
-	g++ -c $< $(CXXFLAGS)
+	g++ -c $< $(CXXFLAGS) $(CFLAGS)
 
 exprAST.o: exprAST.cpp exprAST.hpp
-	g++ -c $< $(CXXFLAGS)
+	g++ -c $< $(CXXFLAGS) $(CFLAGS)
 
 symTab.o: symTab.cpp symTab.hpp
-	g++ -c $< $(CXXFLAGS)
+	g++ -c $< $(CXXFLAGS) $(CFLAGS)
 
 typeAST.o: typeAST.cpp typeAST.hpp
-	g++ -c $< $(CXXFLAGS)
+	g++ -c $< $(CXXFLAGS) $(CFLAGS)
 
 parser.tab.o: parser.tab.cpp
 	g++ -c $<

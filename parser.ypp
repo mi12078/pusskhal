@@ -48,13 +48,14 @@ struct blkStruct
 %token PROGRAM CONST TYPE VAR PROCEDURE FUNCTION BEGINT END WHILE NOT
 %token DO IF OF THEN FOR TO DOWNTO READLN WRITELN
 %token INTEGERTYPE REALTYPE STRINGTYPE BOOLEANTYPE
-%token ARRAY STRING
+%token ARRAY
 %token TRUE FALSE EOFT
 %token UMINUS
 
 %token<s> ID
 %token<i> INTEGER
 %token<r> REAL
+%token<s> STRING
 
 
 %type<strVec> var_list
@@ -300,7 +301,7 @@ expr: expr '+' expr 	{ $$ = new BinaryExprAST('+', $1, $3); }
 }
 | INTEGER 	{ $$ = new IntegerExprAST($1, new IntegerType); }
 | REAL 		{ $$ = new RealExprAST($1, new RealType); }
-/*| STRING*/
+| STRING	{ $$ = new StringExprAST(*$1, new StringType); delete $1; }
 ;
 
 bool_rel_expr: NOT bool_rel_expr { $$ = new UnaryExprAST('!', $2); }
@@ -369,7 +370,7 @@ int main()
 	//yydebug = 1;
 	yyparse();
 	if(rootNode->typeCheck() == T_ERROR)
-		std::cout << "Semantic check passed" << std::endl;
-	else
 		std::cout << "Semantic check failed" << std::endl;
+	else
+		std::cout << "Semantic check passed" << std::endl;
 }
