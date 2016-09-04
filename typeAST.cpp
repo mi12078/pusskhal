@@ -48,7 +48,7 @@ TypeAST* FunctionType::clone() {
 	return new FunctionType(_retType, _params);
 }
 
-std::vector<std::pair<std::string,TypeAST*> > params() const
+std::vector<std::pair<std::string,TypeAST*> > FunctionType::params() const
 {
 	return _params;
 }

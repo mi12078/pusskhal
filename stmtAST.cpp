@@ -8,6 +8,10 @@ void CompoundStmtAST::codegen() const
 {
 }
 
+void EmptyStmtAST::codegen() const
+{
+}
+
 void AssignmentStmtAST::codegen() const
 {
 }
@@ -46,13 +50,19 @@ int CompoundStmtAST::typeCheck() const
 	return T_VOID;
 }
 
+int EmptyStmtAST::typeCheck() const
+{
+	return T_VOID;
+}
+
 int AssignmentStmtAST::typeCheck() const
 {
 	TypeAST* lhs = st.searchTable(_id);
 	int rhs = _rhs->typeCheck();
 	if(lhs == nullptr)
 	{
-		std::cerr << "No symbol named " << _id << std::endl;
+		std::cerr << "No symbol named " << _id << " (AssignmentStmtAST)";
+		std::cerr <<  std::endl;
 		return T_ERROR;
 	}
 	if(rhs == T_ERROR)
@@ -70,7 +80,8 @@ int ArrAssignmentStmtAST::typeCheck() const
 
 	if(lhs == nullptr)
 	{
-		std::cerr << "No symbol named " << _id << std::endl;
+		std::cerr << "No symbol named " << _id << "(ArrAssignmentStmtAST)";
+		std::cerr <<  std::endl;
 		return T_ERROR;
 	}
 	if(index != T_INTEGER)
@@ -121,7 +132,8 @@ int FnDeclStmtAST::typeCheck() const
 	if(st.searchTable(_name))
 	{
 		std::cerr << "Can't declare fn " << _name;
-		std::cerr << ", symbol already exists" << std::endl;
+		std::cerr << ", symbol already exists";
+		std::cerr << " (FnDeclStmtAST)" << std::endl;
 		return T_ERROR;
 	}
 	st.insertSymbol(_name, new FunctionType(_retType, _localVars));
@@ -137,7 +149,8 @@ int FnDeclStmtAST::typeCheck() const
 		{
 			/*var with the same name has already been inserted*/
 			std::cerr << "Multiple variable declaration in ";
-			std::cerr << " function " << _name << std::endl;
+			std::cerr << " function " << _name;
+			std::cerr << " (FnDeclStmtAST)" << std::endl;
 			return T_ERROR;
 		}
 		st.insertSymbol(e.first, e.second);
@@ -156,17 +169,21 @@ int FnCallStmtAST::typeCheck() const
 	TypeAST* s = st.searchTable(_name);
 	if(s == nullptr)
 	{
-		std::cerr << "No symbol named " << s << std::endl;
+		std::cerr << "No symbol named " << _name;
+		std::cerr << " (FnCallStmtAST)" << std::endl;
 		return T_ERROR;
 	}
 
 	auto params = dynamic_cast<FunctionType*>(s)->params();
 
-	if(params.size() != _args.size())
-	{
-		std::cerr << "Invalid no. of args specified" << std::endl;
-		return T_ERROR;
-	}
+	/*since we want writeln to have a variadic no. of args, we omit checking*/
+	if(_name != "writeln")
+		if(params.size() != _args.size())
+		{
+			std::cerr << "Invalid no. of args specified";
+			std::cerr << " (FnCallStmtAST)" << std::endl;
+			return T_ERROR;
+		}
 
 	std::vector<ExprAST*>::const_iterator it1;
 	std::vector<std::pair<std::string, TypeAST*> >::iterator it2;
@@ -179,6 +196,7 @@ int FnCallStmtAST::typeCheck() const
 		if((arg == T_ERROR) || (arg != param))
 		{
 			std::cerr << "Invalid argument type" << std::endl;
+			std::cerr << " (FnCallStmtAST)" << std::endl;
 			return T_ERROR;
 		}
 	}

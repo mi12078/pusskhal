@@ -113,7 +113,7 @@ private:
 class UnaryExprAST : public ExprAST {
 public:
     UnaryExprAST(char op, ExprAST *operand)
-    :_operand(operand)
+    :_op(op), _operand(operand)
     {}
     void codegen() const;
     int typeCheck() const;
@@ -121,8 +121,19 @@ public:
         delete _operand;
     }
 private:
+	char _op;
     ExprAST *_operand;
 };
 
+class FnCallExprAST : public ExprAST  {
+public:
+	FnCallExprAST(const std::string& n, std::vector<ExprAST*> a)
+		: _name(n), _args(a) {}
+	void codegen() const;
+    int typeCheck() const;
+private:
+	std::string _name;
+	std::vector<ExprAST*> _args;
+};
 
 #endif

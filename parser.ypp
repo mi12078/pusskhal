@@ -12,6 +12,7 @@
 extern int yylex();
 
 SymbolTable st = SymbolTable::get();
+StmtAST* rootNode;
 
 void yyerror(std::string s)
 {
@@ -22,8 +23,10 @@ void yyerror(std::string s)
 struct blkStruct
 {
 	std::vector<std::pair<std::string, TypeAST*> > *params;
+	std::vector<StmtAST*> *procFnDecls;
 	StmtAST *stmts;
-}
+};
+
 %}
 
 %union {
@@ -34,6 +37,7 @@ struct blkStruct
 	ExprAST *expr;
 	TypeAST *ty;
 	StmtAST *stmt;
+	AssignmentStmtAST* assign;
 	std::vector<std::string> *strVec;
 	std::vector<StmtAST*> *stmtVec;
 	std::vector<ExprAST*> *exprVec;
@@ -44,24 +48,27 @@ struct blkStruct
 %token PROGRAM CONST TYPE VAR PROCEDURE FUNCTION BEGINT END WHILE NOT
 %token DO IF OF THEN FOR TO DOWNTO READLN WRITELN
 %token INTEGERTYPE REALTYPE STRINGTYPE BOOLEANTYPE
-%token ARRAY REAL STRING
+%token ARRAY STRING
 %token TRUE FALSE EOFT
 %token UMINUS
 
 %token<s> ID
 %token<i> INTEGER
+%token<r> REAL
 
 
 %type<strVec> var_list
-%type<expr> expr proc_func_arg
-%type<ty> type;
+%type<expr> expr bool_rel_expr proc_func_arg
+%type<ty> type
 %type<pfp> proc_func_param var_decl var_decl_list var_decls 
 %type<pfp> proc_func_params  proc_func_param_list 
-%type<stmt> statement assignment if_stmt for_stmt while_stmt
-%type<stmt> proc_func_call compound_statement stmt_part func_decl
-%type<stmtVec> statement_seq
-%type<stmtVec> proc_func_arg_list
+%type<stmt> statement if_stmt for_stmt while_stmt
+%type<stmt> proc_func_call compound_statement stmt_part func_decl proc_func_decl
+%type<stmtVec> statement_seq proc_func_decls
+%type<exprVec> proc_func_arg_list
 %type<blks> block
+%type<assign> assignment
+%type<stmt> arr_assignment
 
 %right ":="
 %left '='
@@ -82,7 +89,24 @@ program_heading: PROGRAM ID
 program_parameters: program_parameters ',' ID
 | ID
 ;
-program_block: block '.'
+program_block: block '.' {
+	/*global var insertion*/
+	for(auto e : *($1->params))
+		if(!st.searchTable(e.first))
+			st.insertSymbol(e.first, e.second);
+		else
+			yyerror("Global symbol redefinition");
+
+	/*writeln insertion*/
+	std::vector<std::pair<std::string, TypeAST*> > fv;
+	TypeAST* ft = new FunctionType(new VoidType, fv);
+	st.insertSymbol("writeln", ft);
+
+	/*merging fn decls and the main program block into one compound stmt*/
+	std::vector<StmtAST*> tmp(*($1->procFnDecls));
+	tmp.push_back($1->stmts);
+	rootNode = new CompoundStmtAST(tmp);
+}
 ;
 /*shit, pascal allows nested functions...
  *can we ignore that, since block is used only in the
@@ -93,6 +117,7 @@ block: const_defs type_defs var_decls proc_func_decls stmt_part {
 	 *but ignore it when in func_decl?*/
 	$$ = new blkStruct;
 	$$->params = $3;
+	$$->procFnDecls = $4;
 	$$->stmts = $5;
 }
 ;
@@ -119,7 +144,7 @@ type_def: ID '=' type ';'
 
 /*variables*/
 var_decls: VAR var_decl_list { $$ = $2; }
-| { $$ = std::vector<std::pair<std::string, TypeAST*> >(); }
+| { $$ = new std::vector<std::pair<std::string, TypeAST*> >(); }
 ;
 var_decl_list: var_decl_list var_decl {
 	$$ = $1;
@@ -127,7 +152,7 @@ var_decl_list: var_decl_list var_decl {
 		$$->push_back(e);
 }
 | var_decl {
-	$$ = std::vector<std::pair<std::string, TypeAST*> >();
+	$$ = new std::vector<std::pair<std::string, TypeAST*> >();
 	for(auto e: *$1)
 		$$->push_back(e);
 	//delete $1? w8, TypeAST*s would need to be copied then...
@@ -159,36 +184,39 @@ type: INTEGERTYPE { $$ = new IntegerType; }
 /*| arraytype */
 /*| ID */
 ; 
-arraytype: ARRAY range_list OF type
+/*arraytype: ARRAY range_list OF type
 ;
 range_list: range_list ',' range
 | range
 ;
-range: '[' id_or_num '.''.' id_or_num ']'
-;
-id_or_num: ID
-| INTEGER
-;
+range: '[' INTEGER '.''.' INTEGER ']'
+;*/
 
 /*procedures & functions*/
-proc_func_decls: proc_func_decls ';' proc_func_decl 
-| proc_func_decl 
+proc_func_decls: proc_func_decls ';' proc_func_decl {
+	$$ = $1;
+	$$->push_back($3);
+}
+| proc_func_decl {
+	$$ = new std::vector<StmtAST*>();
+	$$->push_back($1);
+}
 
 ;
 proc_func_decl : func_decl { $$ = $1; }
 /*| proc_decl*/
-|
+| { $$ = new EmptyStmtAST; }
 ;
-proc_decl: PROCEDURE ID proc_func_param_list ';' block
-;
+/*proc_decl: PROCEDURE ID proc_func_param_list ';' block
+;*/
 func_decl: FUNCTION ID proc_func_param_list ':' type ';' block {
 	/*extract var_decls from block, merge it with
 	 * proc_func_param_list, then passing it to the ctr*/
-	for(auto e: (*$7)->params)
+	for(auto e: *($7->params))
 	{
 		$3->push_back(e);
 	}
-	$$ = new FnDeclStmtAST(*$2, $3, $5, $7->stmts);
+	$$ = new FnDeclStmtAST(*$2, *$3, $5, $7->stmts);
 }
 ;
 proc_func_param_list : '(' proc_func_params ')' { $$ = $2; }
@@ -208,7 +236,7 @@ proc_func_params: proc_func_params ';' proc_func_param {
 proc_func_param: var_list ':' type {
 	$$ = new std::vector<std::pair<std::string, TypeAST*> >();
 	for(auto e : *$1)
-		$$->push_back(std::make_pair(e, $3);
+		$$->push_back(std::make_pair(e, $3));
 }
 ;
 
@@ -234,74 +262,87 @@ statement_seq: statement_seq ';' statement {
 }
 ;
 statement: assignment { $$ = $1; }
+| arr_assignment { $$ = $1; }
 | if_stmt { $$ = $1; }
 | for_stmt { $$ = $1; }
 | while_stmt { $$ = $1; }
 | proc_func_call { $$ = $1; }
-| ID /*poziv fje/proc*/
+| ID /*poziv fje/proc*/ {
+	std::vector<ExprAST*> tmp;;
+	$$ = new FnCallStmtAST(*$1, tmp);
+	delete $1;
+}
 | compound_statement { $$ = $1; }
-| 
+| { $$ = new EmptyStmtAST; }
 ;
 
-expr: expr '+' expr {
-	$$ = new BinaryExprAST('+', $1, $3);
-}
-| expr '-' expr
-| expr '*' expr
-| expr '/' expr
-| expr '<' expr
-| expr '>' expr
-| '-' expr %prec UMINUS
-| '(' expr ')'
-| TRUE
-| FALSE
+expr: expr '+' expr 	{ $$ = new BinaryExprAST('+', $1, $3); }
+| expr '-' expr 		{ $$ = new BinaryExprAST('-', $1, $3); }
+| expr '*' expr 		{ $$ = new BinaryExprAST('*', $1, $3); }
+| expr '/' expr 		{ $$ = new BinaryExprAST('/', $1, $3); }
+| expr '<' expr 		{ $$ = new BinaryExprAST('<', $1, $3); }
+| expr '>' expr 		{ $$ = new BinaryExprAST('>', $1, $3); }
+| '-' expr %prec UMINUS { $$ = new UnaryExprAST('-', $2); }
+| '(' expr ')' 			{ $$ = $2; }
 | ID '[' expr ']' {
 	$$ = new ArrExprAST(*$1, $3);
 	delete $1;
 }
 | ID {
-	/*moze biti i fja/proc bez args*/
+	/*TODO:moze biti i fja/proc bez args, kako znati koje?*/
 	$$ = new VarExprAST(*$1);
 	delete $1;
 }
-| proc_func_call {
+| ID '(' proc_func_arg_list ')' /*proc_func_call*/ {
+	/*only a fn can return a result*/
+	$$ = new FnCallExprAST(*$1, *$3);
+	delete $1;
 }
-| INTEGER { $$ = new IntegerExprAst($1, new IntegerType); }
-| REAL {$$ = new RealExprAST($1, new RealType); }
-| STRING
+| INTEGER 	{ $$ = new IntegerExprAST($1, new IntegerType); }
+| REAL 		{ $$ = new RealExprAST($1, new RealType); }
+/*| STRING*/
 ;
 
-bool_rel_expr: NOT bool_rel_expr
-| expr '>' expr
-| expr '<' expr
-| expr '=' expr
-| TRUE
-| FALSE
-| EOFT
+bool_rel_expr: NOT bool_rel_expr { $$ = new UnaryExprAST('!', $2); }
+| expr '>' expr { $$ = new BinaryExprAST('>', $1, $3); }
+| expr '<' expr { $$ = new BinaryExprAST('<', $1, $3); }
+| expr '=' expr { $$ = new BinaryExprAST('=', $1, $3); }
+| TRUE { $$ = new BooleanExprAST(true, new BooleanType); }
+| FALSE { $$ = new BooleanExprAST(false, new BooleanType); }
+/*| EOFT*/
 ;
 
 assignment: ID ':''=' expr {
 	$$ = new AssignmentStmtAST(*$1, $4);
 	//delete $1;
 }
-| ID '[' expr ']' ':''=' expr {
+;
+arr_assignment: ID '[' expr ']' ':''=' expr {
 	$$ = new ArrAssignmentStmtAST(*$1, $3, $7);
 	delete $1;
 }
 ;
 
-if_stmt: IF bool_rel_expr THEN statement
+if_stmt: IF bool_rel_expr THEN statement {
+	$$ = new IfStmtAST($2, $4);
+}
 ;
 
-for_stmt: FOR assignment TO expr DO statement
-| FOR assignment DOWNTO expr DO statement
+for_stmt: FOR assignment TO expr DO statement {
+	$$ = new ForStmtAST($2, $4, $6, 1);
+}
+| FOR assignment DOWNTO expr DO statement {
+	$$ = new ForStmtAST($2, $4, $6, 0);
+}
 ;
 
-while_stmt: WHILE bool_rel_expr DO statement
+while_stmt: WHILE bool_rel_expr DO statement {
+	$$ = new WhileStmtAST($2, $4);
+}
 ;
 
 proc_func_call: ID '(' proc_func_arg_list ')' {
-	$$ = new FnCallStmt(*$1, *$3);
+	$$ = new FnCallStmtAST(*$1, *$3);
 	delete $1;
 }
 ;
@@ -313,9 +354,11 @@ proc_func_arg_list: proc_func_arg_list ',' proc_func_arg {
 	$$ = new std::vector<ExprAST*>();
 	$$->push_back($1);
 }
+| {
+	$$ = new std::vector<ExprAST*>();
+}
 ;
 proc_func_arg: expr { $$ = $1; }
-| {/*return empty expr*/}
 ;
 
 
@@ -325,4 +368,8 @@ int main()
 {
 	//yydebug = 1;
 	yyparse();
+	if(rootNode->typeCheck() == T_ERROR)
+		std::cout << "Semantic check passed" << std::endl;
+	else
+		std::cout << "Semantic check failed" << std::endl;
 }

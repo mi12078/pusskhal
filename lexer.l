@@ -3,14 +3,13 @@
 #include <iostream>
 #include <string>
 #include <cstdlib>
-#include "parser.tab.hpp"
+#include <vector>
+#include "exprAST.hpp"
+#include "stmtAST.hpp"
 
-/*promeniti strdup, vratiti std::string*/
-/*lexer prolazi za primer, za sada*/
-/*
-sta da vracaju tipovi? zaseban token ili token da se
-identifikuju kao tipovi?
-*/
+struct blkStruct;
+
+#include "parser.tab.hpp"
 
 %}
 

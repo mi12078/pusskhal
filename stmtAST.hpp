@@ -10,6 +10,11 @@ public:
     virtual int typeCheck() const = 0;
     virtual ~StmtAST(){}
 };
+class EmptyStmtAST: public StmtAST{
+public:
+    void codegen() const;
+    int typeCheck() const;
+};
 class CompoundStmtAST: public StmtAST{
 public:
     CompoundStmtAST(std::vector<StmtAST*> v1)
@@ -74,8 +79,8 @@ private:
 
 class ForStmtAST: public StmtAST{
 public:
-    ForStmtAST(AssignmentStmtAST *a, ExprAST *e, StmtAST *s)
-    :_assign(a), _val(e), _stmt(s)
+    ForStmtAST(AssignmentStmtAST *a, ExprAST *e, StmtAST *s, int i)
+    :_assign(a), _val(e), _stmt(s), _inc(i)
     {}
     void codegen() const;
     int typeCheck() const;
@@ -89,6 +94,7 @@ private:
     AssignmentStmtAST *_assign;
     ExprAST *_val;
     StmtAST *_stmt;
+	int _inc;
 };
 
 
