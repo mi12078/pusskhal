@@ -66,7 +66,19 @@ int VarExprAST::typeCheck() const
 	//do we check for the existence of the variable in the symtab here?
 	TypeAST* entry = st.searchTable(_id);
 	if(entry)
+	{
+		FunctionType* ftp = dynamic_cast<FunctionType*>(entry);
+		if(ftp != NULL)
+		{
+			if(ftp->params().size() != 0)
+			{
+				std::cerr << "Invalid # of arguments specified ";
+				std::cerr << "(VarExprAST special case)" << std::endl;
+				return T_ERROR;
+			}
+		}
 		return entry->type();
+	}
 	else
 	{
 		std::cerr << "No symbol named " << _id << " (VarExprAST)" << std::endl;
