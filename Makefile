@@ -18,12 +18,12 @@ typeAST.o: typeAST.cpp typeAST.hpp
 	g++ -c $< $(CXXFLAGS) $(CFLAGS)
 
 parser.tab.o: parser.tab.cpp
-	g++ -c $<
+	g++ -c $< $(CXXFLAGS)
 parser.tab.cpp parser.tab.hpp: parser.ypp
 	bison -d $<
 
 lex.yy.o: lex.yy.c parser.tab.hpp
-	g++ -c $<
+	g++ -c $< $(CXXFLAGS)
 lex.yy.c: lexer.l
 	flex $<
 

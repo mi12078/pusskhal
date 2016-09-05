@@ -91,20 +91,15 @@ program_parameters: program_parameters ',' ID
 | ID
 ;
 program_block: block '.' {
-	/*global var insertion*/
-	for(auto e : *($1->params))
-		if(!st.searchTable(e.first))
-			st.insertSymbol(e.first, e.second);
-		else
-			yyerror("Global symbol redefinition");
-
 	/*writeln insertion*/
 	std::vector<std::pair<std::string, TypeAST*> > fv;
 	TypeAST* ft = new FunctionType(new VoidType, fv);
 	st.insertSymbol("writeln", ft);
 
 	/*merging fn decls and the main program block into one compound stmt*/
+	auto vars = new VarDeclStmtAST(*($1->params));
 	std::vector<StmtAST*> tmp(*($1->procFnDecls));
+	tmp.insert(tmp.begin(), vars);
 	tmp.push_back($1->stmts);
 	rootNode = new CompoundStmtAST(tmp);
 }
@@ -211,13 +206,14 @@ proc_func_decl : func_decl { $$ = $1; }
 /*proc_decl: PROCEDURE ID proc_func_param_list ';' block
 ;*/
 func_decl: FUNCTION ID proc_func_param_list ':' type ';' block {
-	/*extract var_decls from block, merge it with
-	 * proc_func_param_list, then passing it to the ctr*/
+	/*serves as a parameter-local variable separator, because
+	 *we pass them in the same vector*/
+	$3->push_back(std::make_pair(std::string(""), nullptr));
 	for(auto e: *($7->params))
-	{
 		$3->push_back(e);
-	}
-	$$ = new FnDeclStmtAST(*$2, *$3, $5, $7->stmts);
+
+	auto* tmp = new VarDeclStmtAST(*$3);
+	$$ = new FnDeclStmtAST(*$2, tmp, $5, $7->stmts);
 }
 ;
 proc_func_param_list : '(' proc_func_params ')' { $$ = $2; }

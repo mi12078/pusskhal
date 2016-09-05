@@ -10,11 +10,13 @@ public:
     virtual int typeCheck() const = 0;
     virtual ~StmtAST(){}
 };
+
 class EmptyStmtAST: public StmtAST{
 public:
     void codegen() const;
     int typeCheck() const;
 };
+
 class CompoundStmtAST: public StmtAST{
 public:
     CompoundStmtAST(std::vector<StmtAST*> v1)
@@ -29,6 +31,7 @@ public:
 private:
     std::vector<StmtAST*> _v1;
 };
+
 class AssignmentStmtAST: public StmtAST{
 public:
     AssignmentStmtAST(const std::string& id, ExprAST *rhs)
@@ -115,17 +118,28 @@ private:
     StmtAST *_stmt;
 };
 
+class VarDeclStmtAST : public StmtAST {
+public:
+	VarDeclStmtAST(std::vector<std::pair<std::string, TypeAST*> > v)
+		: _vars(v) {}
+	void codegen() const;
+    int typeCheck() const;
+	std::vector<std::pair<std::string, TypeAST*> > getVars() const;
+private:
+	std::vector<std::pair<std::string, TypeAST*> > _vars;
+};
+
 class FnDeclStmtAST : public StmtAST {
 public:
 	FnDeclStmtAST(const std::string& n,
-		std::vector<std::pair<std::string, TypeAST*> > lv,
+		VarDeclStmtAST* vd,
 		TypeAST* t, StmtAST* b)
-		: _name(n), _localVars(lv), _retType(t), _body(b) {}
+		: _name(n), _fnVars(vd), _retType(t), _body(b) {}
 	void codegen() const;
     int typeCheck() const;
 private:
 	std::string _name;
-	std::vector<std::pair<std::string, TypeAST*> >_localVars;
+	VarDeclStmtAST* _fnVars;
 	TypeAST* _retType;
 	StmtAST* _body;
 };

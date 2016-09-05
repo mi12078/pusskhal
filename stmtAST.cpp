@@ -1,4 +1,5 @@
 #include <iostream>
+#include <algorithm>
 #include "stmtAST.hpp"
 #include "symTab.hpp"
 
@@ -37,6 +38,10 @@ void FnDeclStmtAST::codegen() const
 }
 
 void FnCallStmtAST::codegen() const
+{
+}
+
+void VarDeclStmtAST::codegen() const
 {
 }
 
@@ -142,29 +147,29 @@ int FnDeclStmtAST::typeCheck() const
 		std::cerr << " (FnDeclStmtAST)" << std::endl;
 		return T_ERROR;
 	}
-	st.insertSymbol(_name, new FunctionType(_retType, _localVars));
+	auto paramsVars = _fnVars->getVars();
+	auto sep = std::find(paramsVars.begin(), paramsVars.end(),
+			std::pair<std::string, TypeAST*>("", nullptr));
+	auto params =
+		std::vector<std::pair<std::string, TypeAST*> >(paramsVars.begin(), sep);
+	auto vars =
+		std::vector<std::pair<std::string, TypeAST*> >(sep+1, paramsVars.end());
+
+	st.insertSymbol(_name, new FunctionType(_retType, params));
+
+	paramsVars.erase(sep);
 
 	/*placing nullptrs as a scope separator*/
-	for(auto e : _localVars)
+	for(auto e : paramsVars)
 		st.insertSymbol(e.first, nullptr);
 
 	/*placing the actual symbol info*/
-	for(auto e : _localVars)
-	{
-		if(st.searchTable(e.first))
-		{
-			/*var with the same name has already been inserted*/
-			std::cerr << "Multiple variable declaration in ";
-			std::cerr << " function " << _name;
-			std::cerr << " (FnDeclStmtAST)" << std::endl;
-			return T_ERROR;
-		}
-		st.insertSymbol(e.first, e.second);
-	}
+	if(_fnVars->typeCheck() == T_ERROR)
+		return T_ERROR;
 
 	retVal = _body->typeCheck() == T_ERROR ? T_ERROR : T_VOID;
 
-	for(auto e : _localVars)
+	for(auto e : paramsVars)
 		st.deleteSymbol(e.first);
 
 	return retVal;
@@ -226,4 +231,24 @@ int FnCallStmtAST::typeCheck() const
 	}
 
 	return s->type();
+}
+
+int VarDeclStmtAST::typeCheck() const
+{
+	for(auto e : _vars)
+	{
+		if(st.searchTable(e.first))
+		{
+			/*var with the same name has already been inserted*/
+			std::cerr << "Multiple declaration of variable ";
+			std::cerr <<  e.first << std::endl;
+			return T_ERROR;
+		}
+		st.insertSymbol(e.first, e.second);
+	}
+}
+
+std::vector<std::pair<std::string, TypeAST*> > VarDeclStmtAST::getVars() const
+{
+	return _vars;
 }
