@@ -32,6 +32,17 @@ private:
     std::vector<StmtAST*> _v1;
 };
 
+class MainBlockStmtAST: public StmtAST {
+public:
+    MainBlockStmtAST(StmtAST* s)
+		: _stmt(s)
+    {}
+    void codegen() const;
+    int typeCheck() const;
+private:
+	StmtAST* _stmt;
+};
+
 class AssignmentStmtAST: public StmtAST{
 public:
     AssignmentStmtAST(const std::string& id, ExprAST *rhs)

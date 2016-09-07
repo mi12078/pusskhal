@@ -9,6 +9,10 @@ void CompoundStmtAST::codegen() const
 {
 }
 
+void MainBlockStmtAST::codegen() const
+{
+}
+
 void EmptyStmtAST::codegen() const
 {
 }
@@ -53,6 +57,11 @@ int CompoundStmtAST::typeCheck() const
 		if(e->typeCheck() == T_ERROR)
 			return T_ERROR;
 	return T_VOID;
+}
+
+int MainBlockStmtAST::typeCheck() const
+{
+	return _stmt->typeCheck();
 }
 
 int EmptyStmtAST::typeCheck() const

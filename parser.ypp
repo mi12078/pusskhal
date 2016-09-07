@@ -98,9 +98,10 @@ program_block: block '.' {
 
 	/*merging fn decls and the main program block into one compound stmt*/
 	auto vars = new VarDeclStmtAST(*($1->params));
+	auto mainBlock = new MainBlockStmtAST($1->stmts);
 	std::vector<StmtAST*> tmp(*($1->procFnDecls));
 	tmp.insert(tmp.begin(), vars);
-	tmp.push_back($1->stmts);
+	tmp.push_back(mainBlock);
 	rootNode = new CompoundStmtAST(tmp);
 }
 ;
