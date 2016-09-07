@@ -3,40 +3,50 @@
 #include "symTab.hpp"
 
 extern SymbolTable st;
+extern std::ostream ostr;
+extern std::map<std::string, std::stack<std::string> > varTrTable;
 
-void IntegerExprAST::codegen() const
+void IntegerExprAST::codegen(Register dest) const
+{
+	ostr << "\tmov " << reg[dest] << ", "  << _val << '\n';
+}
+
+void RealExprAST::codegen(Register dest) const
+{
+	ostr << "\tmov " << reg[dest] << ", "  << _val << '\n';
+}
+
+void BooleanExprAST::codegen(Register dest) const
 {
 }
 
-void RealExprAST::codegen() const
+void StringExprAST::codegen(Register dest) const
 {
 }
 
-void BooleanExprAST::codegen() const
+void VarExprAST::codegen(Register dest) const
+{
+	ostr << "\tmov " << reg[dest] << ", ";
+	ostr << '[' << varTrTable[_id].top()<< ']' << '\n';
+}
+
+void ArrExprAST::codegen(Register dest) const
 {
 }
 
-void StringExprAST::codegen() const
+void BinaryExprAST::codegen(Register dest) const
+{
+	_lhs->codegen(R1);
+	_rhs->codegen(R2);
+	ostr << "\tadd " << reg[R1] << ", " << reg[R2] << '\n';
+	ostr << "\tmov " << reg[dest] << ", " << reg[R1] << '\n';
+}
+
+void UnaryExprAST::codegen(Register dest) const
 {
 }
 
-void VarExprAST::codegen() const
-{
-}
-
-void ArrExprAST::codegen() const
-{
-}
-
-void BinaryExprAST::codegen() const
-{
-}
-
-void UnaryExprAST::codegen() const
-{
-}
-
-void FnCallExprAST::codegen() const
+void FnCallExprAST::codegen(Register dest) const
 {
 }
 

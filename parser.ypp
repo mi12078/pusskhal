@@ -13,6 +13,8 @@ extern int yylex();
 
 SymbolTable st = SymbolTable::get();
 StmtAST* rootNode;
+std::ostream ostr(std::cout.rdbuf());
+std::map<std::string, std::stack<std::string> > varTrTable;
 
 void yyerror(std::string s)
 {
@@ -369,5 +371,10 @@ int main()
 	if(rootNode->typeCheck() == T_ERROR)
 		std::cout << "Semantic check failed" << std::endl;
 	else
-		std::cout << "Semantic check passed" << std::endl;
+	{
+		std::cout << ";Semantic check passed" << std::endl;
+		ostr << "global main\n";
+		ostr << "extern printf\n";
+		rootNode->codegen();
+	}
 }

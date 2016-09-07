@@ -4,13 +4,23 @@
 #include "symTab.hpp"
 
 extern SymbolTable st;
+extern std::ostream ostr;
+extern std::map<std::string, std::stack<std::string> > varTrTable;
 
 void CompoundStmtAST::codegen() const
 {
+	for(auto e : _v1)
+		e->codegen();
 }
 
 void MainBlockStmtAST::codegen() const
 {
+	ostr << "\tmain:\n";
+	ostr << "\tpush ebp\n";
+	ostr << "\tmov ebp, esp\n\n";
+	_stmt->codegen();
+	ostr << "\n\tpop ebp\n";
+	ostr << "\tret\n\n";
 }
 
 void EmptyStmtAST::codegen() const
@@ -19,6 +29,8 @@ void EmptyStmtAST::codegen() const
 
 void AssignmentStmtAST::codegen() const
 {
+	_rhs->codegen(R1);
+	ostr << "\tmov [" <<  varTrTable[_id].top() << "], " << reg[R1] << '\n';
 }
 
 void ArrAssignmentStmtAST::codegen() const
@@ -43,10 +55,26 @@ void FnDeclStmtAST::codegen() const
 
 void FnCallStmtAST::codegen() const
 {
+	for(auto e : _args)
+	{
+		e->codegen(R1);
+		ostr << "\tpush " << reg[R1] << '\n';
+	}
+	ostr << "\tcall " << (_name == "writeln" ? "printf" : _name) << '\n';
+	ostr << "\tadd esp, " << _args.size()*4 << '\n';
 }
 
 void VarDeclStmtAST::codegen() const
 {
+	
+	ostr << "section .bss\n";
+	for(auto e : _vars)
+	{
+		varTrTable[e.first].push(e.first);
+		ostr << e.first << ": resd 1\n";
+	}
+	ostr << "\nsection .text\n";
+	ostr << "fmt: db \"%d\", 10, 0\n\n";
 }
 
 /**************************************************************/
@@ -181,6 +209,7 @@ int FnDeclStmtAST::typeCheck() const
 	for(auto e : paramsVars)
 		st.deleteSymbol(e.first);
 
+	paramsVars.insert(sep, std::pair<std::string, TypeAST*>("", nullptr));
 	return retVal;
 }
 

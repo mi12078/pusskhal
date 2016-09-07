@@ -5,6 +5,8 @@
 
 /*TODO: check if we really need copy ctors here*/
 
+const std::string reg[] = { "", "eax", "ebx", "ecx", "edx" };
+enum Register { NONE, R1, R2, R3, R4 };
 enum Type { T_INTEGER = 1, T_REAL, T_CHARACTER,
 			T_BOOLEAN, T_STRING, T_ERROR, T_VOID, T_ARRAY };
 

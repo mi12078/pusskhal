@@ -7,7 +7,7 @@
 
 class ExprAST {
 public:
- 	virtual void codegen() const = 0;    
+ 	virtual void codegen(Register ) const = 0;    
 	virtual int typeCheck() const = 0;
 };
 
@@ -16,7 +16,7 @@ public:
     IntegerExprAST(int v, TypeAST *t)
     :_val(v), _type(t)
     {}
-    void codegen() const;
+    void codegen(Register ) const;
     int typeCheck() const;
 	~IntegerExprAST(){
 		delete _type;
@@ -31,7 +31,7 @@ public:
     RealExprAST(float v, TypeAST *t)
     :_val(v), _type(t)
     {}
-    void codegen() const;
+    void codegen(Register ) const;
     int typeCheck() const;
 	~RealExprAST(){
 		delete _type;
@@ -46,7 +46,7 @@ public:
     BooleanExprAST(bool v, TypeAST *t)
     :_val(v), _type(t)
     {}
-    void codegen() const;
+    void codegen(Register ) const;
     int typeCheck() const;
 	~BooleanExprAST(){
 		delete _type;
@@ -61,7 +61,7 @@ public:
     StringExprAST(std::string v, TypeAST *t)
     :_val(v), _type(t)
     {}
-    void codegen() const;
+    void codegen(Register ) const;
     int typeCheck() const;
 	~StringExprAST(){
 		delete _type;
@@ -76,7 +76,7 @@ public:
     VarExprAST(std::string id)
     :_id(id)
     {}
-    void codegen() const;
+    void codegen(Register ) const;
     int typeCheck() const;
 private:
     std::string _id;
@@ -87,7 +87,7 @@ public:
     ArrExprAST(std::string id, ExprAST* i)
     :_id(id), _index(i)
     {}
-    void codegen() const;
+    void codegen(Register ) const;
     int typeCheck() const;
 private:
     std::string _id;
@@ -99,7 +99,7 @@ public:
     BinaryExprAST(char op, ExprAST *lhs, ExprAST *rhs)
     :_op(op), _lhs(lhs), _rhs(rhs)
     {}
-    void codegen() const;
+    void codegen(Register ) const;
     int typeCheck() const;
     ~BinaryExprAST(){
         delete _lhs;
@@ -115,7 +115,7 @@ public:
     UnaryExprAST(char op, ExprAST *operand)
     :_op(op), _operand(operand)
     {}
-    void codegen() const;
+    void codegen(Register ) const;
     int typeCheck() const;
     ~UnaryExprAST(){
         delete _operand;
@@ -129,7 +129,7 @@ class FnCallExprAST : public ExprAST  {
 public:
 	FnCallExprAST(const std::string& n, std::vector<ExprAST*> a)
 		: _name(n), _args(a) {}
-	void codegen() const;
+	void codegen(Register ) const;
     int typeCheck() const;
 private:
 	std::string _name;
