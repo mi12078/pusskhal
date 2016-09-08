@@ -48,6 +48,13 @@ void UnaryExprAST::codegen(Register dest) const
 
 void FnCallExprAST::codegen(Register dest) const
 {
+	for(auto it=_args.rbegin(); it!=_args.rend(); ++it)
+	{
+		(*it)->codegen(R1);
+		ostr << "\tpush " << reg[R1] << '\n';
+	}
+	ostr << "\tcall " << _name << '\n';
+	ostr << "\tadd esp, " << _args.size() * 4 << '\n';
 }
 
 

@@ -73,13 +73,15 @@ void FnDeclStmtAST::codegen() const
 		varTrTable[e.first].push("ebp-" + std::to_string(offset));
 		offset += 4;
 	}
+	varTrTable[_name].push("ebp-" + std::to_string(offset));
 
 	ostr << _name << ":\n";
 	ostr << "\tpush ebp\n";
 	ostr << "\tmov ebp, esp\n\n";
-	ostr << "\tsub esp, " << vars.size()*4 << '\n';
+	ostr << "\tsub esp, " << (vars.size() + 1) * 4 << '\n';
 	_body->codegen();
-	ostr << "\tadd esp, " << vars.size()*4 << '\n';
+	ostr << "\tadd esp, " << (vars.size() + 1) * 4 << '\n';
+	ostr << "\tmov eax, " << '[' << varTrTable[_name].top() << ']' << '\n';
 	ostr << "\n\tmov esp, ebp\n";
 	ostr << "\tpop ebp\n";
 	ostr << "\tret\n\n";
@@ -246,6 +248,7 @@ int FnDeclStmtAST::typeCheck() const
 	/*placing nullptrs as a scope separator*/
 	for(auto e : paramsVars)
 		st.insertSymbol(e.first, nullptr);
+	st.insertSymbol(_name, _retType);
 
 	/*placing the actual symbol info*/
 	if(_fnVars->typeCheck() == T_ERROR)
@@ -255,6 +258,7 @@ int FnDeclStmtAST::typeCheck() const
 
 	for(auto e : paramsVars)
 		st.deleteSymbol(e.first);
+	st.deleteSymbol(_name);
 
 	paramsVars.insert(sep, std::pair<std::string, TypeAST*>("", nullptr));
 	return retVal;
