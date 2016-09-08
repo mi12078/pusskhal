@@ -39,7 +39,7 @@ void BinaryExprAST::codegen(Register dest) const
 	_lhs->codegen(R1);
 	_rhs->codegen(R2);
 	ostr << "\tadd " << reg[R1] << ", " << reg[R2] << '\n';
-	ostr << "\tmov " << reg[dest] << ", " << reg[R1] << '\n';
+	//ostr << "\tmov " << reg[dest] << ", " << reg[R1] << '\n';
 }
 
 void UnaryExprAST::codegen(Register dest) const

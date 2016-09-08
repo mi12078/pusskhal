@@ -6,6 +6,6 @@ var
 begin
 	a := 3;
 	b := a + 3;
-	writeln(a);	
-	writeln(b);	
+	writeln(a);
+	writeln(b);
 end.

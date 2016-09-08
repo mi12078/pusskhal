@@ -15,11 +15,12 @@ void CompoundStmtAST::codegen() const
 
 void MainBlockStmtAST::codegen() const
 {
-	ostr << "\tmain:\n";
+	ostr << "main:\n";
 	ostr << "\tpush ebp\n";
 	ostr << "\tmov ebp, esp\n\n";
 	_stmt->codegen();
-	ostr << "\n\tpop ebp\n";
+	ostr << "\n\tmov esp, ebp\n";
+	ostr << "\tpop ebp\n";
 	ostr << "\tret\n\n";
 }
 
@@ -51,17 +52,63 @@ void WhileStmtAST::codegen() const
 
 void FnDeclStmtAST::codegen() const
 {
+
+	auto paramsVars = _fnVars->getVars();
+	auto sep = std::find(paramsVars.begin(), paramsVars.end(),
+			std::pair<std::string, TypeAST*>("", nullptr));
+	auto params =
+		std::vector<std::pair<std::string, TypeAST*> >(paramsVars.begin(), sep);
+	auto vars =
+		std::vector<std::pair<std::string, TypeAST*> >(sep+1, paramsVars.end());
+
+	int offset = 8;
+	for(auto e : params)
+	{
+		varTrTable[e.first].push("ebp+" + std::to_string(offset));
+		offset += 4;
+	}
+	offset = 4;
+	for(auto e : vars)
+	{
+		varTrTable[e.first].push("ebp-" + std::to_string(offset));
+		offset += 4;
+	}
+
+	ostr << _name << ":\n";
+	ostr << "\tpush ebp\n";
+	ostr << "\tmov ebp, esp\n\n";
+	ostr << "\tsub esp, " << vars.size()*4 << '\n';
+	_body->codegen();
+	ostr << "\tadd esp, " << vars.size()*4 << '\n';
+	ostr << "\n\tmov esp, ebp\n";
+	ostr << "\tpop ebp\n";
+	ostr << "\tret\n\n";
+
+	for(auto e : params)
+		varTrTable[e.first].pop();
+
+	for(auto e : vars)
+		varTrTable[e.first].pop();
 }
 
 void FnCallStmtAST::codegen() const
 {
-	for(auto e : _args)
+	for(auto it=_args.rbegin(); it!=_args.rend(); ++it)
 	{
-		e->codegen(R1);
+		(*it)->codegen(R1);
 		ostr << "\tpush " << reg[R1] << '\n';
 	}
-	ostr << "\tcall " << (_name == "writeln" ? "printf" : _name) << '\n';
-	ostr << "\tadd esp, " << _args.size()*4 << '\n';
+	if(_name == "writeln")
+	{
+		ostr << "\tpush fmt\n";
+		ostr << "\tcall " <<  "printf\n";
+		ostr << "\tadd esp, " << (_args.size() + 1) * 4 << '\n';
+	}
+	else
+	{
+		ostr << "\tcall " <<  _name << '\n';
+		ostr << "\tadd esp, " << _args.size()*4 << '\n';
+	}
 }
 
 void VarDeclStmtAST::codegen() const
