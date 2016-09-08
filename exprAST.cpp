@@ -36,19 +36,26 @@ void ArrExprAST::codegen(Register dest) const
 
 void BinaryExprAST::codegen(Register dest) const
 {
-	_lhs->codegen(R1);
-	_rhs->codegen(R2);
+	std::string ins;
+
+	_lhs->codegen(dest);
+	_rhs->codegen(Register(dest+1));
 	switch(_op)
 	{
 		case '+':
-			ostr << "\tadd " << reg[R1] << ", " << reg[R2] << '\n';
-			//ostr << "\tmov " << reg[dest] << ", " << reg[R1] << '\n';
+			ins = "add";
+		break;
+		case '-':
+			ins = "sub";
+		break;
+		case '*':
+			ins = "imul";
 		break;
 		case '=':
-			ostr << "\tcmp " << reg[R1] << ", " << reg[R2] << '\n';
-			//ostr << "\tmov " << reg[dest] << ", " << reg[R1] << '\n';
+			ins = "cmp";
 		break;
 	}
+	ostr << "\t" << ins << " " << reg[dest] << ", " << reg[dest+1] << '\n';
 }
 
 void UnaryExprAST::codegen(Register dest) const

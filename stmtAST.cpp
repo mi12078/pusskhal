@@ -50,7 +50,7 @@ void IfStmtAST::codegen() const
 	int tmp = labelCounter;
 	labelCounter++;
 	_cond->codegen(R1);
-	ostr << "\tje L" << tmp << '\n';
+	ostr << "\tjne L" << tmp << '\n';
 	_stmt->codegen();
 	ostr << "L" << tmp << ":\n";
 }
