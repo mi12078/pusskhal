@@ -7,6 +7,8 @@ extern SymbolTable st;
 extern std::ostream ostr;
 extern std::map<std::string, std::stack<std::string> > varTrTable;
 
+int labelCounter = 0;
+
 void CompoundStmtAST::codegen() const
 {
 	for(auto e : _v1)
@@ -34,16 +36,50 @@ void AssignmentStmtAST::codegen() const
 	ostr << "\tmov [" <<  varTrTable[_id].top() << "], " << reg[R1] << '\n';
 }
 
+std::string AssignmentStmtAST::id() const
+{
+	return _id;
+}
+
 void ArrAssignmentStmtAST::codegen() const
 {
 }
 
 void IfStmtAST::codegen() const
 {
+	int tmp = labelCounter;
+	labelCounter++;
+	_cond->codegen(R1);
+	ostr << "\tje L" << tmp << '\n';
+	_stmt->codegen();
+	ostr << "L" << tmp << ":\n";
 }
 
 void ForStmtAST::codegen() const
 {
+	int tmp = labelCounter;
+	labelCounter += 2;
+
+	_assign->codegen();
+	ostr << "L" << tmp++ << ":\n";
+
+	/*load var, check if it meets exit conditions, jump if so*/
+	ostr << "\tmov " << reg[R1] << ", [" << _assign->id() << "]\n";
+	_val->codegen(R2);
+	ostr << "\tcmp " << reg[R1] << ", " << reg[R2] << '\n';
+	ostr << "\tje L" << tmp << '\n';
+
+	_stmt->codegen();
+
+	ostr << "\tmov " << reg[R1] << ", [" << _assign->id() << "]\n";
+	if(_inc)
+		ostr << "\tinc " << reg[R1] << '\n';
+	else
+		ostr << "\tsub " << reg[R1] << '\n';
+	ostr << "\tmov [" << _assign->id() << "], " << reg[R1] << '\n';
+
+	ostr << "\tjmp L" << tmp-1 << '\n';
+	ostr << "L" << tmp << ":\n";
 }
 
 void WhileStmtAST::codegen() const

@@ -50,6 +50,7 @@ public:
     {}
     void codegen() const;
     int typeCheck() const;
+	std::string id() const;
     ~AssignmentStmtAST(){
         delete _rhs;
     }
@@ -65,6 +66,7 @@ public:
     {}
     void codegen() const;
     int typeCheck() const;
+	std::string id();
     ~ArrAssignmentStmtAST(){
         delete _index;
         delete _rhs;
