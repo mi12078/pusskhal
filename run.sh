@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 if [ $# -eq 1 ] && [ -e $1 ]
 then
 	./prog < $1 > out.asm
@@ -8,7 +10,7 @@ then
 	./a.out
 elif [ $# -eq 0 ]
 then
-	rm out.asm out.o a.out
+	rm -f out.asm out.o a.out
 else
 	exit 1
 fi

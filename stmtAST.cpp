@@ -103,7 +103,8 @@ void FnDeclStmtAST::codegen() const
 		varTrTable[e.first].push("ebp+" + std::to_string(offset));
 		offset += 4;
 	}
-	offset = 4;
+	//originally 4, moved to 16 bcs of 4 pushes after fn prologue
+	offset = 16;
 	for(auto e : vars)
 	{
 		varTrTable[e.first].push("ebp-" + std::to_string(offset));
@@ -112,12 +113,26 @@ void FnDeclStmtAST::codegen() const
 	varTrTable[_name].push("ebp-" + std::to_string(offset));
 
 	ostr << _name << ":\n";
+	//fn prologue
 	ostr << "\tpush ebp\n";
 	ostr << "\tmov ebp, esp\n\n";
+	//save EVERYTHING
+	ostr << "\tpush edx\n";
+	ostr << "\tpush ecx\n";
+	ostr << "\tpush ebx\n";
+	ostr << "\tpush eax\n";
+	//reserving space for locals
 	ostr << "\tsub esp, " << (vars.size() + 1) * 4 << '\n';
 	_body->codegen();
+	//deallocating local variable space
 	ostr << "\tadd esp, " << (vars.size() + 1) * 4 << '\n';
 	ostr << "\tmov eax, " << '[' << varTrTable[_name].top() << ']' << '\n';
+	//restore saved registers
+	ostr << "\tpop eax\n";
+	ostr << "\tpop ebx\n";
+	ostr << "\tpop ecx\n";
+	ostr << "\tpop edx\n";
+	//fn epilogue
 	ostr << "\n\tmov esp, ebp\n";
 	ostr << "\tpop ebp\n";
 	ostr << "\tret\n\n";

@@ -55,7 +55,7 @@ void BinaryExprAST::codegen(Register dest) const
 			ins = "cmp";
 		break;
 	}
-	ostr << "\t" << ins << " " << reg[dest] << ", " << reg[dest+1] << '\n';
+	ostr << '\t' << ins << " " << reg[dest] << ", " << reg[dest+1] << '\n';
 }
 
 void UnaryExprAST::codegen(Register dest) const
@@ -64,13 +64,20 @@ void UnaryExprAST::codegen(Register dest) const
 
 void FnCallExprAST::codegen(Register dest) const
 {
+	if(dest != R1)
+		ostr << "\tpush " << reg[R1] << '\n';
 	for(auto it=_args.rbegin(); it!=_args.rend(); ++it)
 	{
-		(*it)->codegen(R1);
-		ostr << "\tpush " << reg[R1] << '\n';
+		(*it)->codegen(dest);
+		ostr << "\tpush " << reg[dest] << '\n';
 	}
 	ostr << "\tcall " << _name << '\n';
+	if(dest != R1)
+		ostr << "\tmov " << reg[dest] << ", " << reg[R1] << '\n';
 	ostr << "\tadd esp, " << _args.size() * 4 << '\n';
+
+	if(dest != R1)
+		ostr << "\tpop " << reg[R1] << '\n';
 }
 
 
