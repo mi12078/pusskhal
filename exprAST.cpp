@@ -64,18 +64,24 @@ void UnaryExprAST::codegen(Register dest) const
 
 void FnCallExprAST::codegen(Register dest) const
 {
+	//(1) Since functions always return in eax, we save the previous value
 	if(dest != R1)
 		ostr << "\tpush " << reg[R1] << '\n';
+
 	for(auto it=_args.rbegin(); it!=_args.rend(); ++it)
 	{
 		(*it)->codegen(dest);
 		ostr << "\tpush " << reg[dest] << '\n';
 	}
+
 	ostr << "\tcall " << _name << '\n';
+
 	if(dest != R1)
 		ostr << "\tmov " << reg[dest] << ", " << reg[R1] << '\n';
+
 	ostr << "\tadd esp, " << _args.size() * 4 << '\n';
 
+	//(2)
 	if(dest != R1)
 		ostr << "\tpop " << reg[R1] << '\n';
 }

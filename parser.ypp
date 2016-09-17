@@ -13,7 +13,9 @@ extern int yylex();
 
 SymbolTable st = SymbolTable::get();
 StmtAST* rootNode;
+//stream used to output the assembly code to
 std::ostream ostr(std::cout.rdbuf());
+//used for storing global as well as fn local vars and parameters
 std::map<std::string, std::stack<std::string> > varTrTable;
 
 void yyerror(std::string s)
@@ -374,7 +376,7 @@ int main()
 	{
 		std::cout << ";Semantic check passed" << std::endl;
 		ostr << "global main\n";
-		ostr << "extern printf\n";
+		ostr << "extern printf\n\n";
 		rootNode->codegen();
 	}
 }

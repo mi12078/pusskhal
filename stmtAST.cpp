@@ -53,6 +53,7 @@ void IfStmtAST::codegen() const
 	ostr << "\tjne L" << tmp << '\n';
 	_stmt->codegen();
 	ostr << "L" << tmp << ":\n";
+	//TODO: look at <,>,=
 }
 
 void ForStmtAST::codegen() const
@@ -72,10 +73,12 @@ void ForStmtAST::codegen() const
 	_stmt->codegen();
 
 	ostr << "\tmov " << reg[R1] << ", [" << _assign->id() << "]\n";
+
 	if(_inc)
 		ostr << "\tinc " << reg[R1] << '\n';
 	else
 		ostr << "\tsub " << reg[R1] << '\n';
+
 	ostr << "\tmov [" << _assign->id() << "], " << reg[R1] << '\n';
 
 	ostr << "\tjmp L" << tmp-1 << '\n';
