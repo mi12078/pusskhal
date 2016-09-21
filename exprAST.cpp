@@ -38,6 +38,13 @@ void BinaryExprAST::codegen(Register dest) const
 {
 	std::string ins;
 
+	//no more registers to generate rhs in
+	if(dest+1  > regNo)
+	{
+		std::cerr << "Ran out of registers, aborting" << std::endl;
+		ostr << ";Ran out of registers, aborting" << std::endl;
+		exit(EXIT_FAILURE);
+	}
 	_lhs->codegen(dest);
 	_rhs->codegen(Register(dest+1));
 	switch(_op)
