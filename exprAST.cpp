@@ -43,19 +43,27 @@ void BinaryExprAST::codegen(Register dest) const
 	switch(_op)
 	{
 		case '+':
-			ins = "add";
+			ostr << '\t' << "add" << " " << reg[dest] << ", " << reg[dest+1] << '\n';
 		break;
 		case '-':
-			ins = "sub";
+			ostr << '\t' << "sub" << " " << reg[dest] << ", " << reg[dest+1] << '\n';
 		break;
 		case '*':
-			ins = "imul";
+			ostr << '\t' << "imul" << " " << reg[dest] << ", " << reg[dest+1] << '\n';
 		break;
 		case '=':
-			ins = "cmp";
+			ostr << '\t' << "cmp" << " " << reg[dest] << ", " << reg[dest+1] << '\n';
+			ostr << "\tjne L";
+		break;
+		case '<':
+			ostr << '\t' << "cmp" << " " << reg[dest] << ", " << reg[dest+1] << '\n';
+			ostr << "\tjge L";
+		break;
+		case '>':
+			ostr << '\t' << "cmp" << " " << reg[dest] << ", " << reg[dest+1] << '\n';
+			ostr << "\tjle L";
 		break;
 	}
-	ostr << '\t' << ins << " " << reg[dest] << ", " << reg[dest+1] << '\n';
 }
 
 void UnaryExprAST::codegen(Register dest) const

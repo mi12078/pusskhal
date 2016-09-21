@@ -33,6 +33,7 @@ struct blkStruct;
 (?i:not) { return NOT; }
 (?i:do) { return DO; }
 (?i:if) { return IF; }
+(?i:else) { return ELSE; }
 (?i:of) { return OF; }
 (?i:then) { return THEN; }
 (?i:for) { return FOR; }

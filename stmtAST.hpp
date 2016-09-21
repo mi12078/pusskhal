@@ -93,6 +93,24 @@ private:
     StmtAST *_stmt;
 };
 
+class IfElseStmtAST: public StmtAST{
+public:
+    IfElseStmtAST(ExprAST *con, StmtAST *stmt1, StmtAST *stmt2)
+    :_cond(con), _stmt1(stmt1), _stmt2(stmt2)
+    {}
+    void codegen() const;
+    int typeCheck() const;
+    ~IfElseStmtAST(){
+        delete _cond;
+        delete _stmt1;
+        delete _stmt2;
+    }
+private:
+    ExprAST *_cond;
+    StmtAST *_stmt1;
+    StmtAST *_stmt2;
+};
+
 class ForStmtAST: public StmtAST{
 public:
     ForStmtAST(AssignmentStmtAST *a, ExprAST *e, StmtAST *s, int i)

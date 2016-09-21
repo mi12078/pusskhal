@@ -50,10 +50,22 @@ void IfStmtAST::codegen() const
 	int tmp = labelCounter;
 	labelCounter++;
 	_cond->codegen(R1);
-	ostr << "\tjne L" << tmp << '\n';
+	//adequate jump is generated above
+	ostr << tmp << '\n';
 	_stmt->codegen();
 	ostr << "L" << tmp << ":\n";
-	//TODO: look at <,>,=
+}
+
+void IfElseStmtAST::codegen() const
+{
+	int tmp = labelCounter;
+	labelCounter++;
+	_cond->codegen(R1);
+	//adequate jump is generated above
+	ostr << tmp << '\n';
+	_stmt1->codegen();
+	ostr << "L" << tmp << ":\n";
+	_stmt2->codegen();
 }
 
 void ForStmtAST::codegen() const
@@ -77,7 +89,7 @@ void ForStmtAST::codegen() const
 	if(_inc)
 		ostr << "\tinc " << reg[R1] << '\n';
 	else
-		ostr << "\tsub " << reg[R1] << '\n';
+		ostr << "\tdec " << reg[R1] << '\n';
 
 	ostr << "\tmov [" << _assign->id() << "], " << reg[R1] << '\n';
 
@@ -252,6 +264,17 @@ int IfStmtAST::typeCheck() const
 		return T_ERROR;
 	return T_VOID;
 }
+int IfElseStmtAST::typeCheck() const
+{
+	if(_cond->typeCheck() == T_ERROR)
+		return T_ERROR;
+	if(_stmt1->typeCheck() == T_ERROR)
+		return T_ERROR;
+	if(_stmt2->typeCheck() == T_ERROR)
+		return T_ERROR;
+	return T_VOID;
+}
+
 
 int ForStmtAST::typeCheck() const
 {

@@ -50,7 +50,7 @@ struct blkStruct
 }
 
 %token PROGRAM CONST TYPE VAR PROCEDURE FUNCTION BEGINT END WHILE NOT
-%token DO IF OF THEN FOR TO DOWNTO READLN WRITELN
+%token DO IF ELSE OF THEN FOR TO DOWNTO READLN WRITELN
 %token INTEGERTYPE REALTYPE STRINGTYPE BOOLEANTYPE
 %token ARRAY
 %token TRUE FALSE EOFT
@@ -67,7 +67,7 @@ struct blkStruct
 %type<ty> type
 %type<pfp> proc_func_param var_decl var_decl_list var_decls 
 %type<pfp> proc_func_params  proc_func_param_list 
-%type<stmt> statement if_stmt for_stmt while_stmt
+%type<stmt> statement if_stmt if_else_stmt for_stmt while_stmt
 %type<stmt> proc_func_call compound_statement stmt_part func_decl proc_func_decl
 %type<stmtVec> statement_seq proc_func_decls
 %type<exprVec> proc_func_arg_list
@@ -81,7 +81,8 @@ struct blkStruct
 %left '['
 %left '+' '-'
 %left '*' '/'
-%nonassoc UMINUS
+%nonassoc THEN
+%nonassoc UMINUS ELSE
 
 %%
 
@@ -266,6 +267,7 @@ statement_seq: statement_seq ';' statement {
 statement: assignment { $$ = $1; }
 | arr_assignment { $$ = $1; }
 | if_stmt { $$ = $1; }
+| if_else_stmt { $$ = $1; }
 | for_stmt { $$ = $1; }
 | while_stmt { $$ = $1; }
 | proc_func_call { $$ = $1; }
@@ -330,6 +332,11 @@ if_stmt: IF bool_rel_expr THEN statement {
 }
 ;
 
+if_else_stmt: IF bool_rel_expr THEN statement ELSE statement {
+	$$ = new IfElseStmtAST($2, $4, $6);
+}
+;
+
 for_stmt: FOR assignment TO expr DO statement {
 	$$ = new ForStmtAST($2, $4, $6, 1);
 }
@@ -371,7 +378,10 @@ int main()
 	//yydebug = 1;
 	yyparse();
 	if(rootNode->typeCheck() == T_ERROR)
-		std::cout << "Semantic check failed" << std::endl;
+	{
+		std::cerr << "Semantic check failed" << std::endl;
+		return 1;
+	}
 	else
 	{
 		std::cout << ";Semantic check passed" << std::endl;
